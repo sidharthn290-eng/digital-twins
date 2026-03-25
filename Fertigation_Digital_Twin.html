@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endo Fertigation System — Digital Twin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8f9fb;--bg-panel:#ffffff;--bg-card:#f0f2f5;--border:#d1d5db;--cyan:#0891b2;--cyan-dim:#0e7490;--blue:#2563eb;--blue-dim:#1d4ed8;--green:#16a34a;--green-dim:#15803d;--yellow:#ca8a04;--orange:#ea580c;--red:#dc2626;--purple:#9333ea;--text:#1e293b;--text-dim:#64748b;--text-mid:#475569;--font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:2px}
+.app{display:grid;grid-template-rows:46px 1fr 105px;grid-template-columns:195px 1fr 275px;grid-template-areas:"header header header""left viewport right""bottom bottom bottom";width:100vw;height:100vh;gap:1px}
+.header{grid-area:header;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--bg-panel);border-bottom:2px solid var(--cyan);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-logo{font-size:15px;font-weight:800;color:var(--cyan);letter-spacing:2px}
+.header-sep{width:1px;height:20px;background:var(--border)}
+.header-title{font-size:10px;font-weight:600;color:var(--text-mid);letter-spacing:1.5px;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:14px;font-size:10px;color:var(--text-dim);font-family:var(--mono)}
+.mode-btn{padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim);transition:all .2s;font-family:var(--font)}
+.mode-btn.active{background:var(--cyan);color:#fff;border-color:var(--cyan);box-shadow:0 0 6px rgba(8,145,178,.2)}
+.mode-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);display:inline-block}
+.left{grid-area:left;background:var(--bg-panel);border-right:1px solid var(--border);overflow-y:auto;box-shadow:1px 0 3px rgba(0,0,0,.05)}
+.section-label{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding:12px 12px 6px}
+.dev{padding:6px 12px;border-bottom:1px solid rgba(209,213,219,.5);cursor:pointer;transition:all .12s;border-left:2px solid transparent}
+.dev:hover{background:rgba(8,145,178,.06)}
+.dev.active{background:rgba(8,145,178,.1);border-left-color:var(--cyan)}
+.dev-name{font-size:10px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px}
+.dev-sub{font-size:8px;color:var(--text-dim);font-family:var(--mono);margin-top:1px}
+.badge{display:inline-flex;font-size:7px;font-weight:700;font-family:var(--mono);padding:1px 5px;border-radius:2px;letter-spacing:.5px}
+.badge-on{background:rgba(22,163,74,.12);color:var(--green)}
+.badge-off{background:rgba(220,38,38,.1);color:var(--red)}
+.viewport{grid-area:viewport;background:var(--bg);position:relative;overflow:hidden}
+.right{grid-area:right;background:var(--bg-panel);border-left:1px solid var(--border);overflow-y:auto;box-shadow:-1px 0 3px rgba(0,0,0,.05)}
+.kpi{padding:8px 12px;border-bottom:1px solid var(--border)}
+.kpi-label{font-size:8px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.kpi-val{font-size:22px;font-weight:700;font-family:var(--mono)}
+.kpi-unit{font-size:10px;color:var(--text-dim);margin-left:2px;font-weight:400}
+.kpi-bar{height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
+.kpi-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.kpi-row{display:grid;grid-template-columns:1fr 1fr}
+.kpi-row .kpi{padding:6px 10px}
+.kpi-row .kpi-val{font-size:15px}
+.sparkline{display:flex;align-items:flex-end;gap:1px;height:20px;margin-top:3px}
+.spark-bar{width:2.5px;border-radius:1px;transition:height .3s}
+.kpi-trend{font-size:8px;font-family:var(--mono);margin-top:1px}
+.trend-up{color:var(--green)}.trend-down{color:var(--red)}.trend-stable{color:var(--yellow)}
+.bottom{grid-area:bottom;background:var(--bg-panel);border-top:1px solid var(--border);display:flex;flex-direction:column}
+.bottom-tabs{display:flex;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.bottom-tab{padding:6px 12px;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.bottom-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.log-feed{flex:1;overflow-y:auto;padding:1px 0}
+.log-item{display:flex;align-items:center;gap:8px;padding:2px 14px;font-size:9px;border-bottom:1px solid rgba(209,213,219,.5)}
+.log-time{font-family:var(--mono);font-size:8px;color:var(--text-dim);min-width:58px}
+.log-msg{color:var(--text-mid)}
+.log-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+.log-dot.info{background:var(--cyan)}.log-dot.warn{background:var(--yellow)}.log-dot.crit{background:var(--red)}.log-dot.ok{background:var(--green)}
+.cycle-bar{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:6px;padding:5px 14px;z-index:10;backdrop-filter:blur(4px);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.cyc{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);padding:3px 8px;border-radius:3px;transition:all .3s;font-family:var(--mono)}
+.cyc.on{color:#fff;background:var(--cyan);box-shadow:0 0 6px rgba(8,145,178,.25)}
+.cyc.done{color:var(--green)}
+.cyc-arr{color:var(--text-dim);font-size:8px}
+svg text{font-family:'Inter',sans-serif}
+/* Pipes */
+.P{fill:none;stroke:#b0bec5;stroke-linecap:round;stroke-linejoin:round}
+.P6{stroke-width:6}.P4{stroke-width:4}.P3{stroke-width:3}.P2{stroke-width:2}
+.F{fill:none;stroke:rgba(37,99,235,.6);stroke-linecap:round;stroke-linejoin:round}
+/* Nutrient-enriched water (green-tinted after venturi) */
+.FN{fill:none;stroke:rgba(22,163,74,.6);stroke-linecap:round;stroke-linejoin:round}
+.FN6{stroke-width:6}.FN4{stroke-width:4}.FN3{stroke-width:3}
+.F6{stroke-width:6}.F4{stroke-width:4}.F3{stroke-width:3}.F2{stroke-width:2}
+@keyframes flowR{from{stroke-dashoffset:18}to{stroke-dashoffset:0}}
+@keyframes flowD{from{stroke-dashoffset:18}to{stroke-dashoffset:0}}
+.fa{stroke-dasharray:3,5;animation:flowR .5s linear infinite}
+.fd{stroke-dasharray:3,5;animation:flowD .5s linear infinite}
+/* Conduit — structured cable runs (orange thin solid) */
+.C{fill:none;stroke:rgba(202,138,4,.25);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.C.on{stroke:rgba(202,138,4,.55)}
+/* Signal ticks on conduit */
+.sig-tick{fill:none;stroke:#ca8a04;stroke-width:1;opacity:0}
+.sig-tick.on{opacity:1;animation:sigPulse .8s ease-in-out infinite}
+@keyframes sigPulse{0%,100%{opacity:.4;stroke:#ca8a04}50%{opacity:1;stroke:#a16207}}
+/* Wireless link */
+@keyframes wifiPulse{0%{r:4;opacity:.7}100%{r:14;opacity:0}}
+/* Valve */
+.VB{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1.2}.VB.on{fill:var(--green-dim);stroke:var(--green)}
+/* Pump spin */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spinning{animation:spin .8s linear infinite}
+/* Glow filters */
+.glow-g{filter:drop-shadow(0 0 2px rgba(22,163,74,.35))}.glow-c{filter:drop-shadow(0 0 2px rgba(8,145,178,.35))}.glow-y{filter:drop-shadow(0 0 2px rgba(202,138,4,.3))}
+/* Zone */
+.Z{rx:3;fill:#f0fdf4;stroke:#cbd5e1;stroke-width:1}.Z.on{fill:rgba(22,163,74,.08);stroke:var(--green)}
+.ZL{font-size:8px;fill:var(--text-dim);font-weight:600;text-anchor:middle}.ZL.on{fill:var(--green)}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- ══════════ HEADER ══════════ -->
+<div class="header">
+  <div class="header-left">
+    <span class="header-logo">ENDO</span><span class="header-sep"></span>
+    <span class="header-title">Fertigation System — Digital Twin</span>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;gap:4px">
+      <button class="mode-btn active" id="mAuto" onclick="setMode('auto')">AUTO</button>
+      <button class="mode-btn" id="mSemi" onclick="setMode('semi')">SEMI</button>
+      <button class="mode-btn" id="mMan" onclick="setMode('manual')">MANUAL</button>
+    </div>
+    <span class="header-sep"></span>
+    <span><span class="status-dot"></span> ONLINE</span>
+    <span id="clock">00:00:00</span>
+  </div>
+</div>
+
+<!-- ══════════ LEFT PANEL ══════════ -->
+<div class="left">
+  <div class="section-label">Gateway Controlled</div>
+  <div class="dev active" onclick="sel(this)"><div class="dev-name">RO Pump <span class="badge badge-on" id="bRO">ON</span></div><div class="dev-sub">2HP · 240V AC</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Blower <span class="badge badge-off" id="bBlow">OFF</span></div><div class="dev-sub">Aeration · 0.5HP</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">EC-1 Valve <span class="badge badge-off" id="bEC1">OFF</span></div><div class="dev-sub">Base A · Solenoid 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">EC-2 Valve <span class="badge badge-off" id="bEC2">OFF</span></div><div class="dev-sub">Base B · Solenoid 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">EC-3 Valve <span class="badge badge-off" id="bEC3">OFF</span></div><div class="dev-sub">CalMag · Solenoid 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">EC-4 Valve <span class="badge badge-off" id="bEC4">OFF</span></div><div class="dev-sub">Micro · Solenoid 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">pH Valve <span class="badge badge-off" id="bPH">OFF</span></div><div class="dev-sub">Acid Dosing · Solenoid 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Main Pump <span class="badge badge-on" id="bPump">ON</span></div><div class="dev-sub">5HP · 415V 3-Phase</div></div>
+
+  <div class="section-label">End Node Controlled</div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Irr Valve <span class="badge badge-on" id="bIrr">ON</span></div><div class="dev-sub">Master Solenoid · 24V</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Zone 1 <span class="badge badge-on" id="bZ1">ON</span></div><div class="dev-sub">Drip · Tomato</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Zone 2 <span class="badge badge-on" id="bZ2">ON</span></div><div class="dev-sub">Drip · Capsicum</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Zone 3 <span class="badge badge-on" id="bZ3">ON</span></div><div class="dev-sub">Drip · Cucumber</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Zone 4 <span class="badge badge-on" id="bZ4">ON</span></div><div class="dev-sub">Sprinkler · Lettuce</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Zone 5 <span class="badge badge-on" id="bZ5">ON</span></div><div class="dev-sub">Fogger · Herbs</div></div>
+
+  <div class="section-label">Passive / Sensors</div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Water Source</div><div class="dev-sub">UG Tank · 5000L</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Disc Filter</div><div class="dev-sub">120 Mesh · Auto-Flush</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Venturi Ch-A</div><div class="dev-sub">EC-1 + EC-2 · Bypass</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Venturi Ch-B</div><div class="dev-sub">EC-3 + EC-4 · Bypass</div></div>
+  <div class="dev" onclick="sel(this)"><div class="dev-name">Venturi Ch-C</div><div class="dev-sub">pH Acid · Bypass</div></div>
+</div>
+
+<!-- ══════════ CENTER VIEWPORT ══════════ -->
+<div class="viewport">
+  <div class="cycle-bar">
+    <div class="cyc on" id="cyc0">FILL</div><span class="cyc-arr">▸</span>
+    <div class="cyc" id="cyc1">MIX</div><span class="cyc-arr">▸</span>
+    <div class="cyc" id="cyc2">INJECT</div><span class="cyc-arr">▸</span>
+    <div class="cyc" id="cyc3">IRRIGATE</div><span class="cyc-arr">▸</span>
+    <div class="cyc" id="cyc4">FLUSH</div>
+  </div>
+
+  <svg id="svg" width="100%" height="100%" viewBox="0 0 1060 540" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="gW" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".75"/><stop offset="100%" stop-color="#1e40af" stop-opacity=".9"/></linearGradient>
+      <linearGradient id="gT" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient>
+      <linearGradient id="gN1" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#059669" stop-opacity=".65"/><stop offset="100%" stop-color="#064e3b" stop-opacity=".85"/></linearGradient>
+      <linearGradient id="gN2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#d97706" stop-opacity=".65"/><stop offset="100%" stop-color="#78350f" stop-opacity=".85"/></linearGradient>
+      <linearGradient id="gPH" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#7c3aed" stop-opacity=".65"/><stop offset="100%" stop-color="#4c1d95" stop-opacity=".85"/></linearGradient>
+      <filter id="fG"><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#16a34a" flood-opacity=".3"/></filter>
+      <filter id="fC"><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#0891b2" flood-opacity=".3"/></filter>
+      <filter id="fY"><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#ca8a04" flood-opacity=".25"/></filter>
+      <filter id="fB"><feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#2563eb" flood-opacity=".25"/></filter>
+    </defs>
+
+    <!-- ═══════════════════ UNDERGROUND WATER TANK ═══════════════════ -->
+    <g id="gSrc">
+      <rect x="22" y="330" width="76" height="115" rx="5" fill="url(#gT)" stroke="#94a3b8" stroke-width="1.2"/>
+      <rect x="24" y="370" width="72" height="73" rx="3" fill="url(#gW)" opacity=".75" id="srcWater">
+        <animate attributeName="height" values="73;70;73" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="370;373;370" dur="4s" repeatCount="indefinite"/>
+      </rect>
+      <path fill="none" stroke="rgba(37,99,235,.4)" stroke-width="1.2">
+        <animate attributeName="d" values="M24,370 Q40,367 60,370 Q80,373 96,370;M24,370 Q40,373 60,370 Q80,367 96,370;M24,370 Q40,367 60,370 Q80,373 96,370" dur="3s" repeatCount="indefinite"/>
+      </path>
+      <!-- Level gauge -->
+      <rect x="10" y="335" width="8" height="106" rx="2" fill="#f0f2f5" stroke="#cbd5e1" stroke-width=".8"/>
+      <rect x="11" y="370" width="6" height="69" rx="1" fill="var(--blue)" opacity=".5"/>
+      <text x="14" y="332" font-size="6" fill="var(--text-dim)" text-anchor="middle">%</text>
+      <text x="60" y="325" font-size="8" fill="var(--text-mid)" text-anchor="middle" font-weight="600">WATER SOURCE</text>
+      <text x="60" y="400" font-size="13" fill="#1e293b" text-anchor="middle" font-weight="700" font-family="var(--mono)" id="srcLvlTxt">3200</text>
+      <text x="60" y="411" font-size="7" fill="var(--text-dim)" text-anchor="middle">Liters</text>
+      <text x="60" y="456" font-size="7" fill="var(--text-dim)" text-anchor="middle" font-family="var(--mono)">UG Tank · 5000L</text>
+    </g>
+
+    <!-- ═══════════════════ RO PUMP ═══════════════════ -->
+    <g id="gRO" transform="translate(60,280)">
+      <circle cx="0" cy="0" r="16" fill="#e8ecf1" stroke="var(--green)" stroke-width="1.5" id="roCirc" filter="url(#fG)"/>
+      <g class="spinning" id="roBlade" style="transform-origin:0 0">
+        <line x1="-9" y1="0" x2="9" y2="0" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="0" y1="-9" x2="0" y2="9" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="-6" y1="-6" x2="6" y2="6" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="6" y1="-6" x2="-6" y2="6" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <text x="0" y="26" font-size="7" fill="var(--green)" text-anchor="middle" font-weight="700">RO PUMP</text>
+      <text x="0" y="34" font-size="6" fill="var(--text-dim)" text-anchor="middle" font-family="var(--mono)">2HP</text>
+    </g>
+
+    <!-- Pipe: Source → RO Pump → Mix Tank -->
+    <path d="M98,385 L120,385 L120,280 L44,280" class="P P6"/>
+    <path d="M98,385 L120,385 L120,280 L44,280" class="F F6 fa" id="fSrcRO" opacity=".75"/>
+    <path d="M76,280 L140,280 L140,252" class="P P6"/>
+    <path d="M76,280 L140,280 L140,252" class="F F6 fa" id="fROmix" opacity=".75"/>
+    <!-- Check valve on RO outlet -->
+    <g transform="translate(108,280)"><polygon points="-4,-5 4,0 -4,5" fill="none" stroke="var(--green)" stroke-width="1"/><line x1="4" y1="-5" x2="4" y2="5" stroke="var(--green)" stroke-width="1"/></g>
+
+    <!-- ═══════════════════ MIXING TANK ═══════════════════ -->
+    <g id="gMix">
+      <rect x="115" y="115" width="95" height="135" rx="6" fill="url(#gT)" stroke="#94a3b8" stroke-width="1.2"/>
+      <rect x="117" y="165" width="91" height="83" rx="4" fill="url(#gW)" opacity=".65" id="mixWater">
+        <animate attributeName="height" values="83;79;83" dur="5s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="165;169;165" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <path fill="none" stroke="rgba(37,99,235,.35)" stroke-width="1">
+        <animate attributeName="d" values="M117,165 Q140,162 162,165 Q185,168 208,165;M117,165 Q140,168 162,165 Q185,162 208,165;M117,165 Q140,162 162,165 Q185,168 208,165" dur="2.5s" repeatCount="indefinite"/>
+      </path>
+      <!-- Stirrer shaft -->
+      <line x1="162" y1="120" x2="162" y2="210" stroke="#94a3b8" stroke-width="1.5" id="stirrer"/>
+      <line x1="152" y1="200" x2="172" y2="200" stroke="#94a3b8" stroke-width="1.5" id="stirBlade1"/>
+      <line x1="155" y1="190" x2="169" y2="190" stroke="#94a3b8" stroke-width="1" id="stirBlade2"/>
+      <text x="162" y="108" font-size="8" fill="var(--text-mid)" text-anchor="middle" font-weight="600">MIXING TANK</text>
+      <text x="162" y="195" font-size="14" fill="#1e293b" text-anchor="middle" font-weight="700" font-family="var(--mono)" id="mixLvlTxt">1850</text>
+      <text x="162" y="207" font-size="7" fill="var(--text-dim)" text-anchor="middle">L</text>
+      <!-- Level bar -->
+      <rect x="212" y="120" width="14" height="126" rx="2" fill="#f0f2f5" stroke="#cbd5e1" stroke-width=".7"/>
+      <rect x="214" y="157" width="10" height="87" rx="1" fill="var(--blue)" opacity=".55" id="mixBar"/>
+      <text x="219" y="152" font-size="7" fill="var(--blue)" text-anchor="middle" font-family="var(--mono)" font-weight="600" id="mixPct">62%</text>
+      <!-- Inline EC/pH on tank -->
+      <rect x="120" y="228" width="36" height="14" rx="2" fill="#f0f2f5" stroke="var(--cyan)" stroke-width=".6"/>
+      <text x="124" y="237" font-size="5.5" fill="var(--text-dim)">EC</text>
+      <text x="151" y="238" font-size="8" fill="var(--cyan)" text-anchor="end" font-family="var(--mono)" font-weight="600" id="tEC">1.8</text>
+      <rect x="160" y="228" width="36" height="14" rx="2" fill="#f0f2f5" stroke="var(--purple)" stroke-width=".6"/>
+      <text x="164" y="237" font-size="5.5" fill="var(--text-dim)">pH</text>
+      <text x="191" y="238" font-size="8" fill="var(--purple)" text-anchor="end" font-family="var(--mono)" font-weight="600" id="tPH">6.2</text>
+    </g>
+
+    <!-- ═══════════════════ BLOWER ═══════════════════ -->
+    <g id="gBlow" transform="translate(60,175)">
+      <circle cx="0" cy="0" r="12" fill="#e8ecf1" stroke="#94a3b8" stroke-width="1.2" id="blowCirc"/>
+      <g id="blowBlade" style="transform-origin:0 0">
+        <line x1="-7" y1="0" x2="7" y2="0" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="0" y1="-7" x2="0" y2="7" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/>
+      </g>
+      <text x="0" y="20" font-size="6" fill="var(--text-dim)" text-anchor="middle" font-weight="600">BLOWER</text>
+    </g>
+    <path d="M72,175 L115,175" class="P P3" stroke-dasharray="2,3" opacity=".35"/>
+    <path d="M72,175 L115,175" class="F F3 fa" id="fBlow" opacity="0"/>
+
+    <!-- ═══════════════════ NUTRIENT TANKS ═══════════════════ -->
+    <!-- EC-1 -->
+    <g transform="translate(165,38)">
+      <rect x="-18" y="0" width="36" height="48" rx="3" fill="url(#gT)" stroke="#94a3b8" stroke-width=".8"/>
+      <rect x="-16" y="17" width="32" height="29" rx="2" fill="url(#gN1)" opacity=".75"/>
+      <text x="0" y="-4" font-size="7" fill="var(--cyan)" text-anchor="middle" font-weight="700">EC-1</text>
+      <text x="0" y="60" font-size="6" fill="var(--text-dim)" text-anchor="middle">Base A</text>
+      <!-- Solenoid valve -->
+      <rect x="-5" y="48" width="10" height="7" rx="1" class="VB" id="vEC1"/>
+      <circle cx="0" cy="51.5" r="2" fill="var(--red)" id="dEC1"/>
+      <!-- Check valve below solenoid -->
+      <g transform="translate(0,60)"><polygon points="-3,-3 3,0 -3,3" fill="none" stroke="#94a3b8" stroke-width=".7"/><line x1="3" y1="-3" x2="3" y2="3" stroke="#94a3b8" stroke-width=".7"/></g>
+    </g>
+    <!-- EC-2 -->
+    <g transform="translate(225,38)">
+      <rect x="-18" y="0" width="36" height="48" rx="3" fill="url(#gT)" stroke="#94a3b8" stroke-width=".8"/>
+      <rect x="-16" y="19" width="32" height="27" rx="2" fill="url(#gN1)" opacity=".75"/>
+      <text x="0" y="-4" font-size="7" fill="var(--cyan)" text-anchor="middle" font-weight="700">EC-2</text>
+      <text x="0" y="60" font-size="6" fill="var(--text-dim)" text-anchor="middle">Base B</text>
+      <rect x="-5" y="48" width="10" height="7" rx="1" class="VB" id="vEC2"/>
+      <circle cx="0" cy="51.5" r="2" fill="var(--red)" id="dEC2"/>
+      <g transform="translate(0,60)"><polygon points="-3,-3 3,0 -3,3" fill="none" stroke="#94a3b8" stroke-width=".7"/><line x1="3" y1="-3" x2="3" y2="3" stroke="#94a3b8" stroke-width=".7"/></g>
+    </g>
+    <!-- EC-3 -->
+    <g transform="translate(285,38)">
+      <rect x="-18" y="0" width="36" height="48" rx="3" fill="url(#gT)" stroke="#94a3b8" stroke-width=".8"/>
+      <rect x="-16" y="21" width="32" height="25" rx="2" fill="url(#gN2)" opacity=".75"/>
+      <text x="0" y="-4" font-size="7" fill="var(--cyan)" text-anchor="middle" font-weight="700">EC-3</text>
+      <text x="0" y="60" font-size="6" fill="var(--text-dim)" text-anchor="middle">CalMag</text>
+      <rect x="-5" y="48" width="10" height="7" rx="1" class="VB" id="vEC3"/>
+      <circle cx="0" cy="51.5" r="2" fill="var(--red)" id="dEC3"/>
+      <g transform="translate(0,60)"><polygon points="-3,-3 3,0 -3,3" fill="none" stroke="#94a3b8" stroke-width=".7"/><line x1="3" y1="-3" x2="3" y2="3" stroke="#94a3b8" stroke-width=".7"/></g>
+    </g>
+    <!-- EC-4 -->
+    <g transform="translate(345,38)">
+      <rect x="-18" y="0" width="36" height="48" rx="3" fill="url(#gT)" stroke="#94a3b8" stroke-width=".8"/>
+      <rect x="-16" y="23" width="32" height="23" rx="2" fill="url(#gN2)" opacity=".75"/>
+      <text x="0" y="-4" font-size="7" fill="var(--cyan)" text-anchor="middle" font-weight="700">EC-4</text>
+      <text x="0" y="60" font-size="6" fill="var(--text-dim)" text-anchor="middle">Micro</text>
+      <rect x="-5" y="48" width="10" height="7" rx="1" class="VB" id="vEC4"/>
+      <circle cx="0" cy="51.5" r="2" fill="var(--red)" id="dEC4"/>
+      <g transform="translate(0,60)"><polygon points="-3,-3 3,0 -3,3" fill="none" stroke="#94a3b8" stroke-width=".7"/><line x1="3" y1="-3" x2="3" y2="3" stroke="#94a3b8" stroke-width=".7"/></g>
+    </g>
+    <!-- pH -->
+    <g transform="translate(405,38)">
+      <rect x="-18" y="0" width="36" height="48" rx="3" fill="url(#gT)" stroke="#94a3b8" stroke-width=".8"/>
+      <rect x="-16" y="15" width="32" height="31" rx="2" fill="url(#gPH)" opacity=".75"/>
+      <text x="0" y="-4" font-size="7" fill="var(--purple)" text-anchor="middle" font-weight="700">pH</text>
+      <text x="0" y="60" font-size="6" fill="var(--text-dim)" text-anchor="middle">Acid</text>
+      <rect x="-5" y="48" width="10" height="7" rx="1" class="VB" id="vPH"/>
+      <circle cx="0" cy="51.5" r="2" fill="var(--red)" id="dPH"/>
+      <g transform="translate(0,60)"><polygon points="-3,-3 3,0 -3,3" fill="none" stroke="#94a3b8" stroke-width=".7"/><line x1="3" y1="-3" x2="3" y2="3" stroke="#94a3b8" stroke-width=".7"/></g>
+    </g>
+
+    <!-- ═══ Nutrient drops from tanks to collection headers ═══ -->
+    <!-- EC-1 & EC-2 drop → merge to header A → route right -->
+    <path d="M165,103 L165,112" class="P P2"/><path d="M165,103 L165,112" class="F F2 fd" id="fE1" opacity="0"/>
+    <path d="M225,103 L225,112" class="P P2"/><path d="M225,103 L225,112" class="F F2 fd" id="fE2" opacity="0"/>
+    <path d="M165,112 L225,112" class="P P2"/>
+    <path d="M165,112 L225,112" class="F F2 fa" id="fNH_A" opacity="0"/>
+    <path d="M195,112 L195,118 L460,118 L460,195" class="P P2"/>
+    <path d="M195,112 L195,118 L460,118 L460,195" class="F F2 fa" id="fNHA_down" opacity="0"/>
+
+    <!-- EC-3 & EC-4 drop → merge to header B → route right -->
+    <path d="M285,103 L285,112" class="P P2"/><path d="M285,103 L285,112" class="F F2 fd" id="fE3" opacity="0"/>
+    <path d="M345,103 L345,112" class="P P2"/><path d="M345,103 L345,112" class="F F2 fd" id="fE4" opacity="0"/>
+    <path d="M285,112 L345,112" class="P P2"/>
+    <path d="M285,112 L345,112" class="F F2 fa" id="fNH_B" opacity="0"/>
+    <path d="M315,112 L315,126 L480,126 L480,195" class="P P2"/>
+    <path d="M315,112 L315,126 L480,126 L480,195" class="F F2 fa" id="fNHB_down" opacity="0"/>
+
+    <!-- pH drop → route right to V-C -->
+    <path d="M405,103 L405,134 L500,134 L500,195" class="P P2"/>
+    <path d="M405,103 L405,134 L500,134 L500,195" class="F F2 fd" id="fPHd" opacity="0"/>
+
+    <!-- ═══════════════════ 3-CHANNEL VENTURI INJECTION RACK ═══════════════════ -->
+    <!-- Background panel for the rack -->
+    <rect x="438" y="178" width="84" height="90" rx="4" fill="rgba(226,232,240,.6)" stroke="#cbd5e1" stroke-width=".8" stroke-dasharray="3,3"/>
+    <text x="480" y="190" font-size="6" fill="var(--cyan)" text-anchor="middle" font-weight="700" letter-spacing="1">INJECTION RACK</text>
+
+    <!-- Venturi Ch-A (EC-1 + EC-2) — at y=210 -->
+    <g transform="translate(470,210)">
+      <path d="M-16,0 L-7,-5 L7,-5 L16,0 L7,5 L-7,5 Z" fill="#e2e8f0" stroke="var(--cyan)" stroke-width="1"/>
+      <path d="M-3,-2 L1,0 L-3,2" fill="none" stroke="var(--cyan)" stroke-width=".8" opacity=".7"/>
+      <line x1="-10" y1="-5" x2="-10" y2="-15" stroke="var(--cyan)" stroke-width=".8"/>
+      <text x="-22" y="3" font-size="5.5" fill="var(--cyan)" text-anchor="end" font-weight="700">V-A</text>
+      <text x="22" y="3" font-size="4.5" fill="var(--text-dim)" font-weight="600">EC1+EC2</text>
+    </g>
+    <!-- Venturi Ch-B (EC-3 + EC-4) — at y=230 -->
+    <g transform="translate(470,230)">
+      <path d="M-16,0 L-7,-5 L7,-5 L16,0 L7,5 L-7,5 Z" fill="#e2e8f0" stroke="var(--cyan)" stroke-width="1"/>
+      <path d="M-3,-2 L1,0 L-3,2" fill="none" stroke="var(--cyan)" stroke-width=".8" opacity=".7"/>
+      <line x1="10" y1="-5" x2="10" y2="-15" stroke="var(--cyan)" stroke-width=".8"/>
+      <text x="-22" y="3" font-size="5.5" fill="var(--cyan)" text-anchor="end" font-weight="700">V-B</text>
+      <text x="22" y="3" font-size="4.5" fill="var(--text-dim)" font-weight="600">EC3+EC4</text>
+    </g>
+    <!-- Venturi Ch-C (pH) — at y=250 -->
+    <g transform="translate(470,250)">
+      <path d="M-16,0 L-7,-5 L7,-5 L16,0 L7,5 L-7,5 Z" fill="#e2e8f0" stroke="var(--purple)" stroke-width="1"/>
+      <path d="M-3,-2 L1,0 L-3,2" fill="none" stroke="var(--purple)" stroke-width=".8" opacity=".7"/>
+      <line x1="0" y1="-5" x2="0" y2="-15" stroke="var(--purple)" stroke-width=".8"/>
+      <text x="-22" y="3" font-size="5.5" fill="var(--purple)" text-anchor="end" font-weight="700">V-C</text>
+      <text x="22" y="3" font-size="4.5" fill="var(--text-dim)" font-weight="600">pH Acid</text>
+    </g>
+
+    <!-- Suction pipes from headers to venturi suction ports -->
+    <!-- V-A suction from EC header -->
+    <path d="M460,195 L460,205" class="P P2"/>
+    <!-- V-B suction from EC header -->
+    <path d="M480,195 L480,225" class="P P2"/>
+    <!-- V-C suction from pH -->
+    <path d="M500,195 L500,235 L470,235" class="P P2"/>
+
+    <!-- ═══ PARALLEL BYPASS with Tee fittings & Throttle Valve (proper venturi plumbing) ═══ -->
+    <!-- Tee_A at x=390: bypass branches UP from mainline -->
+    <g transform="translate(390,300)">
+      <circle cx="0" cy="0" r="4.5" fill="#b0bec5" stroke="#94a3b8" stroke-width="1.2"/>
+      <line x1="0" y1="0" x2="0" y2="-7" stroke="#94a3b8" stroke-width="2.5"/>
+      <text x="0" y="16" font-size="4.5" fill="var(--text-dim)" text-anchor="middle">TEE-A</text>
+    </g>
+    <!-- Tee_B at x=530: bypass returns DOWN to mainline -->
+    <g transform="translate(530,300)">
+      <circle cx="0" cy="0" r="4.5" fill="#b0bec5" stroke="#94a3b8" stroke-width="1.2"/>
+      <line x1="0" y1="0" x2="0" y2="-7" stroke="#94a3b8" stroke-width="2.5"/>
+      <text x="0" y="16" font-size="4.5" fill="var(--text-dim)" text-anchor="middle">TEE-B</text>
+    </g>
+    <!-- THROTTLE VALVE on mainline between tees (creates ΔP for venturi suction) -->
+    <g transform="translate(460,300)">
+      <rect x="-11" y="-8" width="22" height="16" rx="2" fill="#e8ecf1" stroke="var(--orange)" stroke-width="1"/>
+      <line x1="-6" y1="-4" x2="6" y2="4" stroke="var(--orange)" stroke-width="1.3"/>
+      <line x1="-6" y1="4" x2="6" y2="-4" stroke="var(--orange)" stroke-width="1.3" opacity=".4"/>
+      <text x="0" y="-13" font-size="5.5" fill="var(--orange)" text-anchor="middle" font-weight="600">THROTTLE</text>
+      <text x="0" y="20" font-size="4" fill="var(--text-dim)" text-anchor="middle">ΔP for Venturi</text>
+    </g>
+
+    <!-- Bypass pipe: Tee_A(390,296) → UP → RIGHT → into injection rack V-A inlet -->
+    <path d="M390,296 L390,270 L438,270 L438,210 L454,210" class="P P3"/>
+    <path d="M390,296 L390,270 L438,270 L438,210 L454,210" class="F F3 fa" id="fVenIn" opacity="0"/>
+    <!-- Venturi A outlet → down to Venturi B inlet -->
+    <path d="M486,210 L492,210 L492,225 L486,225" class="P P2"/>
+    <!-- Venturi B outlet → down to Venturi C inlet -->
+    <path d="M486,230 L494,230 L494,245 L486,245" class="P P2"/>
+    <!-- Internal venturi chain flow overlay -->
+    <path d="M486,210 L494,210 L494,250 L486,250" class="F F2 fa" id="fVenMid" opacity="0"/>
+    <!-- Venturi C outlet → returns DOWN to Tee_B (NOW ENRICHED = GREEN) -->
+    <path d="M486,250 L530,250 L530,296" class="P P3"/>
+    <path d="M486,250 L530,250 L530,296" class="FN FN3 fa" id="fVenOut" opacity="0"/>
+
+    <!-- ═══════════════════ MAIN PUMP ═══════════════════ -->
+    <g id="gPump" transform="translate(300,300)">
+      <circle cx="0" cy="0" r="20" fill="#e8ecf1" stroke="var(--green)" stroke-width="2" id="pumpCirc" filter="url(#fG)"/>
+      <g class="spinning" id="pumpBlade" style="transform-origin:0 0">
+        <line x1="-12" y1="0" x2="12" y2="0" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="0" y1="-12" x2="0" y2="12" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="-8" y1="-8" x2="8" y2="8" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="8" y1="-8" x2="-8" y2="8" stroke="var(--green)" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="0" y="32" font-size="8" fill="var(--green)" text-anchor="middle" font-weight="700">MAIN PUMP</text>
+      <text x="0" y="40" font-size="6" fill="var(--text-dim)" text-anchor="middle" font-family="var(--mono)">5HP · 3Phase</text>
+    </g>
+    <!-- Mix tank → main pump (plain blue water) -->
+    <path d="M210,200 L260,200 L260,300 L280,300" class="P P6"/>
+    <path d="M210,200 L260,200 L260,300 L280,300" class="F F6 fa" id="fMxP1" opacity=".7"/>
+
+    <!-- Mainline pipe: pump outlet → straight through to downstream equipment -->
+    <path d="M320,300 L800,300" class="P P6"/>
+    <!-- Blue flow: pump outlet to Tee_B (plain water before enrichment) -->
+    <path d="M320,300 L530,300" class="F F6 fa" id="fPF" opacity=".7"/>
+    <!-- Green flow: after Tee_B where enriched bypass returns, continues downstream -->
+    <path d="M530,300 L800,300" class="FN FN6 fa" id="fPFn" opacity="0"/>
+    <!-- "ENRICHED" label at color transition point (Tee_B) -->
+    <text x="530" y="282" font-size="5" fill="var(--green)" text-anchor="middle" font-weight="600" opacity=".7" id="txEnriched">ENRICHED</text>
+
+    <!-- ═══════════════════ CHECK VALVE (after Tee_B) ═══════════════════ -->
+    <g transform="translate(558,300)">
+      <polygon points="-4,-5 4,0 -4,5" fill="none" stroke="#64748b" stroke-width="1"/>
+      <line x1="4" y1="-5" x2="4" y2="5" stroke="#64748b" stroke-width="1"/>
+    </g>
+
+    <!-- ═══════════════════ DISC FILTER ═══════════════════ -->
+    <g transform="translate(590,300)">
+      <rect x="-14" y="-11" width="28" height="22" rx="3" fill="#e8ecf1" stroke="var(--cyan)" stroke-width="1.2"/>
+      <line x1="-7" y1="-5" x2="-7" y2="5" stroke="var(--cyan)" stroke-width=".7" opacity=".5"/>
+      <line x1="-3" y1="-5" x2="-3" y2="5" stroke="var(--cyan)" stroke-width=".7" opacity=".5"/>
+      <line x1="1" y1="-5" x2="1" y2="5" stroke="var(--cyan)" stroke-width=".7" opacity=".5"/>
+      <line x1="5" y1="-5" x2="5" y2="5" stroke="var(--cyan)" stroke-width=".7" opacity=".5"/>
+      <line x1="9" y1="-5" x2="9" y2="5" stroke="var(--cyan)" stroke-width=".7" opacity=".5"/>
+      <text x="0" y="20" font-size="6" fill="var(--cyan)" text-anchor="middle" font-weight="600">DISC FILTER</text>
+      <text x="0" y="28" font-size="5" fill="var(--text-dim)" text-anchor="middle">120 Mesh</text>
+    </g>
+
+    <!-- ═══════════════════ BACKFLOW PREVENTER ═══════════════════ -->
+    <g transform="translate(625,283)">
+      <circle cx="0" cy="0" r="6" fill="#f0f2f5" stroke="#94a3b8" stroke-width=".8"/>
+      <text x="0" y="2" font-size="5.5" fill="#64748b" text-anchor="middle" font-weight="700">BF</text>
+      <text x="0" y="12" font-size="5" fill="var(--text-dim)" text-anchor="middle">NRV</text>
+    </g>
+
+    <!-- ═══════════════════ PRESSURE GAUGE ═══════════════════ -->
+    <g transform="translate(655,300)">
+      <circle cx="0" cy="0" r="9" fill="#f0f2f5" stroke="var(--orange)" stroke-width=".8"/>
+      <text x="0" y="1" font-size="6" fill="var(--orange)" text-anchor="middle" font-family="var(--mono)" font-weight="600" id="prTxt">2.4</text>
+      <text x="0" y="7" font-size="4.5" fill="var(--orange)" text-anchor="middle" opacity=".7">bar</text>
+    </g>
+
+    <!-- ═══════════════════ INLINE SENSORS (below pipe, spaced) ═══════════════════ -->
+    <g transform="translate(620,332)">
+      <rect x="-11" y="-8" width="22" height="16" rx="2" fill="#f0f2f5" stroke="var(--cyan)" stroke-width=".7"/>
+      <text x="0" y="-1" font-size="4.5" fill="var(--cyan)" text-anchor="middle">EC</text>
+      <text x="0" y="6" font-size="5.5" fill="var(--cyan)" text-anchor="middle" font-family="var(--mono)" id="ecInline">1.8</text>
+      <line x1="0" y1="-8" x2="0" y2="-20" stroke="var(--cyan)" stroke-width=".5" opacity=".35"/>
+    </g>
+    <g transform="translate(650,332)">
+      <rect x="-11" y="-8" width="22" height="16" rx="2" fill="#f0f2f5" stroke="var(--purple)" stroke-width=".7"/>
+      <text x="0" y="-1" font-size="4.5" fill="var(--purple)" text-anchor="middle">pH</text>
+      <text x="0" y="6" font-size="5.5" fill="var(--purple)" text-anchor="middle" font-family="var(--mono)" id="phInline">6.2</text>
+      <line x1="0" y1="-8" x2="0" y2="-20" stroke="var(--purple)" stroke-width=".5" opacity=".35"/>
+    </g>
+    <g transform="translate(680,332)">
+      <rect x="-11" y="-8" width="22" height="16" rx="2" fill="#f0f2f5" stroke="var(--orange)" stroke-width=".7"/>
+      <text x="0" y="-1" font-size="4.5" fill="var(--orange)" text-anchor="middle">Temp</text>
+      <text x="0" y="6" font-size="5.5" fill="var(--orange)" text-anchor="middle" font-family="var(--mono)" id="tmpInline">24</text>
+      <line x1="0" y1="-8" x2="0" y2="-20" stroke="var(--orange)" stroke-width=".5" opacity=".35"/>
+    </g>
+
+    <!-- ═══════════════════ IRRIGATION MASTER VALVE ═══════════════════ -->
+    <g id="gIrr" transform="translate(720,300)">
+      <rect x="-11" y="-7" width="22" height="14" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width="1.2" id="vIrr"/>
+      <text x="0" y="2" font-size="6" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" font-weight="700" id="vIrrTxt">ON</text>
+      <text x="0" y="-12" font-size="6" fill="var(--text-mid)" text-anchor="middle" font-weight="600">IRR VALVE</text>
+    </g>
+
+    <!-- ═══════════════════ FLOW METER ═══════════════════ -->
+    <g transform="translate(760,300)">
+      <rect x="-12" y="-9" width="24" height="18" rx="3" fill="#f0f2f5" stroke="var(--cyan)" stroke-width="1" filter="url(#fC)"/>
+      <text x="0" y="1" font-size="7" fill="var(--cyan)" text-anchor="middle" font-family="var(--mono)" font-weight="700" id="flowTxt">12.4</text>
+      <text x="0" y="7" font-size="4.5" fill="var(--cyan)" text-anchor="middle" opacity=".7">L/min</text>
+      <text x="0" y="-14" font-size="5.5" fill="var(--text-dim)" text-anchor="middle" font-weight="600">FLOW METER</text>
+    </g>
+
+    <!-- Total flow counter -->
+    <g transform="translate(760,340)">
+      <rect x="-24" y="-8" width="48" height="16" rx="3" fill="#f0f2f5" stroke="#cbd5e1" stroke-width=".7"/>
+      <text x="-18" y="0" font-size="5" fill="var(--text-dim)">TOT</text>
+      <text x="20" y="2" font-size="9" fill="#1e293b" text-anchor="end" font-family="var(--mono)" font-weight="700" id="totTxt">4,280</text>
+      <text x="22" y="2" font-size="5" fill="var(--text-dim)">L</text>
+    </g>
+
+    <!-- Riser: Flow meter outlet → up to zone header level -->
+    <path d="M772,300 L790,300 L790,150" class="P P6"/>
+    <path d="M772,300 L790,300 L790,150" class="FN FN6 fa" id="fRiser" opacity=".7"/>
+
+    <!-- ═══════════════════ ZONE DISTRIBUTION HEADER ═══════════════════ -->
+    <path d="M790,150 L790,155 L690,155 L690,150" class="P P4"/>
+    <path d="M690,150 L1030,150" class="P P4"/>
+    <path d="M690,150 L1030,150" class="FN FN4 fa" id="fZH" opacity=".7"/>
+
+    <!-- ═══════════════════ ZONES (all active, taller plots, real plants) ═══════════════════ -->
+    <!-- Zone 1 — Drip · Tomato -->
+    <g id="gZ1" transform="translate(70,0)">
+      <path d="M630,150 L630,185" class="P P3"/><path d="M630,150 L630,185" class="FN FN3 fd" id="fZ1" opacity=".7"/>
+      <rect x="622" y="177" width="16" height="10" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width=".8" id="vZ1"/>
+      <text x="630" y="185" font-size="5" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" id="vZ1t">ON</text>
+      <rect x="606" y="195" width="48" height="90" rx="3" class="Z on" id="zR1"/>
+      <text x="630" y="207" class="ZL on" id="zL1">ZONE 1</text>
+      <text x="630" y="215" font-size="5" fill="var(--text-dim)" text-anchor="middle">Drip · Tomato</text>
+      <!-- Drip laterals -->
+      <line x1="613" y1="222" x2="613" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="622" y1="222" x2="622" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="630" y1="222" x2="630" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="638" y1="222" x2="638" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="647" y1="222" x2="647" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <!-- Plants: stems + leaf clusters + fruit -->
+      <line x1="613" y1="270" x2="613" y2="242" stroke="#166534" stroke-width=".8"/><circle cx="613" cy="240" r="3.5" fill="#15803d" opacity=".6"/><circle cx="611" cy="236" r="2" fill="#22c55e" opacity=".4"/><circle cx="613" cy="268" r="1.5" fill="#ef4444" opacity=".5"/>
+      <line x1="622" y1="273" x2="622" y2="245" stroke="#166534" stroke-width=".8"/><circle cx="622" cy="243" r="3" fill="#15803d" opacity=".55"/><circle cx="624" cy="239" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="622" cy="270" r="1.5" fill="#ef4444" opacity=".5"/>
+      <line x1="630" y1="270" x2="630" y2="240" stroke="#166534" stroke-width=".8"/><circle cx="630" cy="238" r="4" fill="#15803d" opacity=".6"/><circle cx="628" cy="234" r="2" fill="#22c55e" opacity=".4"/><circle cx="630" cy="266" r="1.8" fill="#ef4444" opacity=".55"/>
+      <line x1="638" y1="274" x2="638" y2="246" stroke="#166534" stroke-width=".8"/><circle cx="638" cy="244" r="3.2" fill="#15803d" opacity=".55"/><circle cx="640" cy="240" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="638" cy="271" r="1.5" fill="#ef4444" opacity=".5"/>
+      <line x1="647" y1="270" x2="647" y2="243" stroke="#166534" stroke-width=".8"/><circle cx="647" cy="241" r="3.5" fill="#15803d" opacity=".6"/><circle cx="645" cy="237" r="2" fill="#22c55e" opacity=".4"/><circle cx="647" cy="267" r="1.5" fill="#ef4444" opacity=".5"/>
+    </g>
+    <!-- Zone 2 — Drip · Capsicum -->
+    <g id="gZ2" transform="translate(70,0)">
+      <path d="M690,150 L690,185" class="P P3"/><path d="M690,150 L690,185" class="FN FN3 fd" id="fZ2" opacity=".7"/>
+      <rect x="682" y="177" width="16" height="10" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width=".8" id="vZ2"/>
+      <text x="690" y="185" font-size="5" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" id="vZ2t">ON</text>
+      <rect x="666" y="195" width="48" height="90" rx="3" class="Z on" id="zR2"/>
+      <text x="690" y="207" class="ZL on" id="zL2">ZONE 2</text>
+      <text x="690" y="215" font-size="5" fill="var(--text-dim)" text-anchor="middle">Drip · Capsicum</text>
+      <line x1="673" y1="222" x2="673" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="682" y1="222" x2="682" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="690" y1="222" x2="690" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="698" y1="222" x2="698" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="707" y1="222" x2="707" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <!-- Plants -->
+      <line x1="673" y1="272" x2="673" y2="244" stroke="#166534" stroke-width=".8"/><circle cx="673" cy="242" r="3.2" fill="#15803d" opacity=".55"/><circle cx="671" cy="238" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="673" cy="267" r="1.8" fill="#eab308" opacity=".5"/>
+      <line x1="682" y1="270" x2="682" y2="242" stroke="#166534" stroke-width=".8"/><circle cx="682" cy="240" r="3.5" fill="#15803d" opacity=".6"/><circle cx="684" cy="236" r="2" fill="#22c55e" opacity=".4"/><circle cx="682" cy="265" r="1.8" fill="#22c55e" opacity=".5"/>
+      <line x1="690" y1="273" x2="690" y2="243" stroke="#166534" stroke-width=".8"/><circle cx="690" cy="241" r="3.8" fill="#15803d" opacity=".6"/><circle cx="688" cy="237" r="2" fill="#22c55e" opacity=".4"/><circle cx="690" cy="268" r="2" fill="#ef4444" opacity=".5"/>
+      <line x1="698" y1="270" x2="698" y2="244" stroke="#166534" stroke-width=".8"/><circle cx="698" cy="242" r="3.2" fill="#15803d" opacity=".55"/><circle cx="700" cy="238" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="698" cy="265" r="1.8" fill="#eab308" opacity=".5"/>
+      <line x1="707" y1="272" x2="707" y2="245" stroke="#166534" stroke-width=".8"/><circle cx="707" cy="243" r="3.5" fill="#15803d" opacity=".6"/><circle cx="705" cy="239" r="2" fill="#22c55e" opacity=".4"/><circle cx="707" cy="268" r="1.5" fill="#22c55e" opacity=".5"/>
+    </g>
+    <!-- Zone 3 — Drip · Cucumber -->
+    <g id="gZ3" transform="translate(70,0)">
+      <path d="M750,150 L750,185" class="P P3"/><path d="M750,150 L750,185" class="FN FN3 fd" id="fZ3" opacity=".7"/>
+      <rect x="742" y="177" width="16" height="10" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width=".8" id="vZ3"/>
+      <text x="750" y="185" font-size="5" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" id="vZ3t">ON</text>
+      <rect x="726" y="195" width="48" height="90" rx="3" class="Z on" id="zR3"/>
+      <text x="750" y="207" class="ZL on" id="zL3">ZONE 3</text>
+      <text x="750" y="215" font-size="5" fill="var(--text-dim)" text-anchor="middle">Drip · Cucumber</text>
+      <line x1="733" y1="222" x2="733" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="742" y1="222" x2="742" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="750" y1="222" x2="750" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="758" y1="222" x2="758" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <line x1="767" y1="222" x2="767" y2="280" stroke="var(--green)" stroke-width=".7" opacity=".45" stroke-dasharray="1.5,2.5"><animate attributeName="stroke-dashoffset" from="4" to="0" dur=".8s" repeatCount="indefinite"/></line>
+      <!-- Plants -->
+      <line x1="733" y1="271" x2="733" y2="241" stroke="#166534" stroke-width=".8"/><circle cx="733" cy="239" r="3.5" fill="#15803d" opacity=".6"/><circle cx="731" cy="235" r="2" fill="#22c55e" opacity=".4"/><ellipse cx="733" cy="265" rx="1.2" ry="3" fill="#166534" opacity=".5"/>
+      <line x1="742" y1="273" x2="742" y2="244" stroke="#166534" stroke-width=".8"/><circle cx="742" cy="242" r="3" fill="#15803d" opacity=".55"/><circle cx="744" cy="238" r="1.8" fill="#22c55e" opacity=".35"/><ellipse cx="742" cy="268" rx="1.2" ry="3" fill="#166534" opacity=".5"/>
+      <line x1="750" y1="270" x2="750" y2="240" stroke="#166534" stroke-width=".8"/><circle cx="750" cy="238" r="4" fill="#15803d" opacity=".6"/><circle cx="748" cy="234" r="2" fill="#22c55e" opacity=".4"/><ellipse cx="750" cy="264" rx="1.4" ry="3.5" fill="#166534" opacity=".55"/>
+      <line x1="758" y1="274" x2="758" y2="246" stroke="#166534" stroke-width=".8"/><circle cx="758" cy="244" r="3.2" fill="#15803d" opacity=".55"/><circle cx="760" cy="240" r="1.8" fill="#22c55e" opacity=".35"/><ellipse cx="758" cy="270" rx="1.2" ry="3" fill="#166534" opacity=".5"/>
+      <line x1="767" y1="270" x2="767" y2="243" stroke="#166534" stroke-width=".8"/><circle cx="767" cy="241" r="3.5" fill="#15803d" opacity=".6"/><circle cx="765" cy="237" r="2" fill="#22c55e" opacity=".4"/><ellipse cx="767" cy="265" rx="1.2" ry="3" fill="#166534" opacity=".5"/>
+    </g>
+    <!-- Zone 4 — Sprinkler · Leafy Greens -->
+    <g id="gZ4" transform="translate(70,0)">
+      <path d="M810,150 L810,185" class="P P3"/><path d="M810,150 L810,185" class="FN FN3 fd" id="fZ4" opacity=".7"/>
+      <rect x="802" y="177" width="16" height="10" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width=".8" id="vZ4"/>
+      <text x="810" y="185" font-size="5" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" id="vZ4t">ON</text>
+      <rect x="786" y="195" width="48" height="90" rx="3" class="Z on" id="zR4"/>
+      <text x="810" y="207" class="ZL on" id="zL4">ZONE 4</text>
+      <text x="810" y="215" font-size="5" fill="var(--text-dim)" text-anchor="middle">Sprinkler · Lettuce</text>
+      <!-- Sprinkler arcs -->
+      <circle cx="797" cy="232" r="7" fill="none" stroke="var(--green)" stroke-width=".5" opacity=".3" stroke-dasharray="2,2"><animate attributeName="r" values="5;9;5" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".3;.1;.3" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="810" cy="230" r="8" fill="none" stroke="var(--green)" stroke-width=".5" opacity=".3" stroke-dasharray="2,2"><animate attributeName="r" values="6;10;6" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".3;.1;.3" dur="2.2s" repeatCount="indefinite"/></circle>
+      <circle cx="823" cy="232" r="7" fill="none" stroke="var(--green)" stroke-width=".5" opacity=".3" stroke-dasharray="2,2"><animate attributeName="r" values="5;9;5" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".3;.1;.3" dur="1.8s" repeatCount="indefinite"/></circle>
+      <!-- Sprinkler heads -->
+      <line x1="797" y1="228" x2="797" y2="224" stroke="var(--green)" stroke-width=".8"/><polygon points="794,224 800,224 797,221" fill="var(--green)" opacity=".5"/>
+      <line x1="810" y1="226" x2="810" y2="222" stroke="var(--green)" stroke-width=".8"/><polygon points="807,222 813,222 810,219" fill="var(--green)" opacity=".5"/>
+      <line x1="823" y1="228" x2="823" y2="224" stroke="var(--green)" stroke-width=".8"/><polygon points="820,224 826,224 823,221" fill="var(--green)" opacity=".5"/>
+      <!-- Lettuce plants — low, bushy circles -->
+      <circle cx="795" cy="258" r="4.5" fill="#166534" opacity=".45"/><circle cx="795" cy="255" r="3" fill="#22c55e" opacity=".3"/>
+      <circle cx="803" cy="262" r="4" fill="#15803d" opacity=".4"/><circle cx="803" cy="259" r="2.5" fill="#22c55e" opacity=".25"/>
+      <circle cx="810" cy="257" r="5" fill="#166534" opacity=".5"/><circle cx="810" cy="254" r="3.2" fill="#22c55e" opacity=".35"/>
+      <circle cx="817" cy="261" r="4" fill="#15803d" opacity=".4"/><circle cx="817" cy="258" r="2.5" fill="#22c55e" opacity=".25"/>
+      <circle cx="825" cy="258" r="4.5" fill="#166534" opacity=".45"/><circle cx="825" cy="255" r="3" fill="#22c55e" opacity=".3"/>
+      <!-- Row 2 -->
+      <circle cx="797" cy="273" r="4" fill="#166534" opacity=".4"/><circle cx="797" cy="270" r="2.5" fill="#22c55e" opacity=".25"/>
+      <circle cx="810" cy="272" r="4.5" fill="#15803d" opacity=".45"/><circle cx="810" cy="269" r="3" fill="#22c55e" opacity=".3"/>
+      <circle cx="823" cy="273" r="4" fill="#166534" opacity=".4"/><circle cx="823" cy="270" r="2.5" fill="#22c55e" opacity=".25"/>
+    </g>
+    <!-- Zone 5 — Fogger · Greenhouse Herbs -->
+    <g id="gZ5" transform="translate(70,0)">
+      <path d="M870,150 L870,185" class="P P3"/><path d="M870,150 L870,185" class="FN FN3 fd" id="fZ5" opacity=".7"/>
+      <rect x="862" y="177" width="16" height="10" rx="2" fill="var(--green-dim)" stroke="var(--green)" stroke-width=".8" id="vZ5"/>
+      <text x="870" y="185" font-size="5" fill="#1e293b" text-anchor="middle" font-family="var(--mono)" id="vZ5t">ON</text>
+      <rect x="846" y="195" width="48" height="90" rx="3" class="Z on" id="zR5"/>
+      <text x="870" y="207" class="ZL on" id="zL5">ZONE 5</text>
+      <text x="870" y="215" font-size="5" fill="var(--text-dim)" text-anchor="middle">Fogger · Herbs</text>
+      <!-- Fog mist clouds -->
+      <circle cx="858" cy="228" r="5" fill="rgba(148,163,184,.15)" stroke="rgba(100,116,139,.25)" stroke-width=".5"><animate attributeName="r" values="4;7;4" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="870" cy="226" r="6" fill="rgba(148,163,184,.15)" stroke="rgba(100,116,139,.25)" stroke-width=".5"><animate attributeName="r" values="5;8;5" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="2.5s" repeatCount="indefinite"/></circle>
+      <circle cx="882" cy="228" r="5" fill="rgba(148,163,184,.15)" stroke="rgba(100,116,139,.25)" stroke-width=".5"><animate attributeName="r" values="4;7;4" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="2.8s" repeatCount="indefinite"/></circle>
+      <!-- Fogger nozzle dots -->
+      <circle cx="858" cy="224" r="1" fill="var(--cyan)" opacity=".5"/><circle cx="870" cy="222" r="1" fill="var(--cyan)" opacity=".5"/><circle cx="882" cy="224" r="1" fill="var(--cyan)" opacity=".5"/>
+      <!-- Herb plants — small bushy clusters, multiple varieties -->
+      <line x1="855" y1="270" x2="855" y2="250" stroke="#166534" stroke-width=".7"/><circle cx="855" cy="248" r="3" fill="#15803d" opacity=".5"/><circle cx="853" cy="245" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="857" cy="246" r="1.5" fill="#16a34a" opacity=".3"/>
+      <line x1="862" y1="273" x2="862" y2="252" stroke="#166534" stroke-width=".7"/><circle cx="862" cy="250" r="2.8" fill="#15803d" opacity=".5"/><circle cx="860" cy="247" r="1.5" fill="#22c55e" opacity=".3"/>
+      <line x1="870" y1="270" x2="870" y2="248" stroke="#166534" stroke-width=".7"/><circle cx="870" cy="246" r="3.5" fill="#166534" opacity=".55"/><circle cx="868" cy="243" r="2" fill="#22c55e" opacity=".4"/><circle cx="872" cy="244" r="1.5" fill="#16a34a" opacity=".3"/>
+      <line x1="878" y1="272" x2="878" y2="251" stroke="#166534" stroke-width=".7"/><circle cx="878" cy="249" r="2.8" fill="#15803d" opacity=".5"/><circle cx="880" cy="246" r="1.5" fill="#22c55e" opacity=".3"/>
+      <line x1="885" y1="270" x2="885" y2="250" stroke="#166534" stroke-width=".7"/><circle cx="885" cy="248" r="3" fill="#15803d" opacity=".5"/><circle cx="883" cy="245" r="1.8" fill="#22c55e" opacity=".35"/><circle cx="887" cy="246" r="1.5" fill="#16a34a" opacity=".3"/>
+      <!-- Row 2 -->
+      <circle cx="858" cy="265" r="2.5" fill="#166534" opacity=".4"/><circle cx="870" cy="264" r="3" fill="#15803d" opacity=".45"/><circle cx="882" cy="265" r="2.5" fill="#166534" opacity=".4"/>
+    </g>
+
+    <!-- ═══════════════════ DRAIN ═══════════════════ -->
+    <g transform="translate(1020,300)">
+      <path d="M-6,0 L6,0 L3,10 L-3,10 Z" fill="#cbd5e1" stroke="#94a3b8" stroke-width=".8"/>
+      <text x="0" y="18" font-size="5" fill="var(--text-dim)" text-anchor="middle">DRAIN</text>
+    </g>
+    <path d="M1000,300 L1014,300" class="P P3" opacity=".3"/>
+
+    <!-- ╔══════════════════════════════════════════════════════════════╗ -->
+    <!-- ║          WIRING: GATEWAY + END NODE (CLEAN CONDUIT)         ║ -->
+    <!-- ╚══════════════════════════════════════════════════════════════╝ -->
+
+    <!-- ──────── GATEWAY CONTROLLER (near fertigation machine) ──────── -->
+    <g id="gGW" transform="translate(300,430)">
+      <rect x="-52" y="-22" width="104" height="44" rx="5" fill="#f0f2f5" stroke="var(--cyan)" stroke-width="1.5" filter="url(#fC)"/>
+      <!-- Antenna -->
+      <line x1="38" y1="-22" x2="38" y2="-34" stroke="var(--cyan)" stroke-width="1.2"/>
+      <circle cx="38" cy="-36" r="2" fill="var(--cyan)"/>
+      <!-- Label -->
+      <text x="-5" y="-9" font-size="7.5" fill="var(--cyan)" text-anchor="middle" font-weight="800" letter-spacing="2">ENDO</text>
+      <text x="-5" y="1" font-size="5.5" fill="var(--text-mid)" text-anchor="middle" font-weight="600">GATEWAY CONTROLLER</text>
+      <text x="-5" y="10" font-size="5" fill="var(--text-dim)" text-anchor="middle" font-family="var(--mono)">8-PIN · WiFi · RS485</text>
+      <!-- Pin LEDs (8 pins) -->
+      <g transform="translate(-40,14)">
+        <circle cx="0" cy="0" r="1.5" id="led0"><animate attributeName="opacity" values="1;.3;1" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="8" cy="0" r="1.5" id="led1"><animate attributeName="opacity" values="1;.4;1" dur="1.8s" repeatCount="indefinite"/></circle>
+        <circle cx="16" cy="0" r="1.5" id="led2"/><circle cx="24" cy="0" r="1.5" id="led3"/>
+        <circle cx="32" cy="0" r="1.5" id="led4"/><circle cx="40" cy="0" r="1.5" id="led5"/>
+        <circle cx="48" cy="0" r="1.5" id="led6"/><circle cx="56" cy="0" r="1.5" id="led7"/>
+      </g>
+    </g>
+
+    <!-- ──────── CONDUIT A: Gateway → RO Pump (Pin 0) ──────── -->
+    <path d="M248,430 L235,430 L235,380 L100,380 L100,296 L76,296" class="C on" id="cRO"/>
+    <path d="M76,296 L76,290" class="sig-tick on" id="sRO"/>
+
+    <!-- ──────── CONDUIT B: Gateway → Blower (Pin 1) ──────── -->
+    <path d="M248,434 L230,434 L230,386 L90,386 L90,185 L72,185" class="C" id="cBlow"/>
+    <path d="M72,185 L72,180" class="sig-tick" id="sBlow"/>
+
+    <!-- ──────── CONDUIT C: Gateway → EC-1 thru EC-4 + pH (Pins 2-6) ──────── -->
+    <!-- Single conduit trunk up, then branches to each valve -->
+    <path d="M300,408 L300,375 L300,100 L165,100 L165,89" class="C" id="cEC1"/>
+    <path d="M300,100 L225,100 L225,89" class="C" id="cEC2"/>
+    <path d="M300,100 L285,100 L285,89" class="C" id="cEC3"/>
+    <path d="M300,100 L345,100 L345,89" class="C" id="cEC4"/>
+    <path d="M300,100 L405,100 L405,89" class="C" id="cPHc"/>
+    <!-- Signal ticks at each valve -->
+    <rect x="163" y="85" width="4" height="4" rx="1" class="sig-tick" id="sEC1"/>
+    <rect x="223" y="85" width="4" height="4" rx="1" class="sig-tick" id="sEC2"/>
+    <rect x="283" y="85" width="4" height="4" rx="1" class="sig-tick" id="sEC3"/>
+    <rect x="343" y="85" width="4" height="4" rx="1" class="sig-tick" id="sEC4"/>
+    <rect x="403" y="85" width="4" height="4" rx="1" class="sig-tick" id="sPH"/>
+
+    <!-- ──────── CONDUIT D: Gateway → Main Pump (Pin 7) ──────── -->
+    <path d="M300,408 L300,375 L300,340" class="C on" id="cPump"/>
+    <path d="M300,340 L300,320" class="sig-tick on" id="sPump"/>
+
+    <!-- ──────── WIRELESS LINK: Gateway ↔ End Node ──────── -->
+    <g transform="translate(520,430)">
+      <!-- Wireless waves from gateway side -->
+      <circle cx="-168" cy="0" r="0" fill="none" stroke="var(--cyan)" stroke-width=".6" opacity="0">
+        <animate attributeName="r" values="3;12" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".6;0" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-168" cy="0" r="0" fill="none" stroke="var(--cyan)" stroke-width=".6" opacity="0">
+        <animate attributeName="r" values="3;12" dur="1.5s" begin=".5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".6;0" dur="1.5s" begin=".5s" repeatCount="indefinite"/>
+      </circle>
+      <!-- Dashed link line -->
+      <line x1="-158" y1="0" x2="148" y2="0" stroke="var(--cyan)" stroke-width=".8" stroke-dasharray="3,4" opacity=".35">
+        <animate attributeName="stroke-dashoffset" from="7" to="0" dur="1s" repeatCount="indefinite"/>
+      </line>
+      <text x="0" y="-8" font-size="5.5" fill="var(--cyan)" text-anchor="middle" opacity=".7" font-weight="600">LoRa / Wi-Fi</text>
+      <!-- Wireless waves from end node side -->
+      <circle cx="148" cy="0" r="0" fill="none" stroke="var(--cyan)" stroke-width=".6" opacity="0">
+        <animate attributeName="r" values="3;12" dur="1.5s" begin=".75s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".6;0" dur="1.5s" begin=".75s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+
+    <!-- ──────── END NODE (near zones / field) ──────── -->
+    <g id="gEN" transform="translate(700,430)">
+      <rect x="-42" y="-18" width="84" height="36" rx="4" fill="#f0f2f5" stroke="var(--green)" stroke-width="1.2" filter="url(#fG)"/>
+      <!-- Antenna -->
+      <line x1="-28" y1="-18" x2="-28" y2="-28" stroke="var(--green)" stroke-width="1"/>
+      <circle cx="-28" cy="-30" r="1.5" fill="var(--green)"/>
+      <text x="5" y="-6" font-size="6.5" fill="var(--green)" text-anchor="middle" font-weight="800" letter-spacing="1.5">ENDO</text>
+      <text x="5" y="3" font-size="5" fill="var(--text-mid)" text-anchor="middle" font-weight="600">END NODE</text>
+      <text x="5" y="11" font-size="4.5" fill="var(--text-dim)" text-anchor="middle" font-family="var(--mono)">6-PIN · IO Expander</text>
+      <!-- LEDs -->
+      <circle cx="-30" cy="11" r="1.3" fill="var(--green)"><animate attributeName="opacity" values="1;.3;1" dur="1.2s" repeatCount="indefinite"/></circle>
+      <circle cx="-24" cy="11" r="1.3" fill="var(--cyan)"><animate attributeName="opacity" values="1;.4;1" dur="1.6s" repeatCount="indefinite"/></circle>
+    </g>
+
+    <!-- ──────── CONDUIT E: End Node → Irrigation Valve (Pin 0) ──────── -->
+    <path d="M700,412 L700,390 L720,390 L720,314" class="C on" id="cIrr"/>
+    <rect x="718" y="310" width="4" height="4" rx="1" class="sig-tick on" id="sIrr"/>
+
+    <!-- ──────── CONDUIT F: End Node → Zone Valves (Pins 1-5) ──────── -->
+    <!-- Single trunk from end node up to zone area, then branches -->
+    <path d="M720,412 L720,385 L700,385 L700,188" class="C on" id="cZ1"/>
+    <path d="M700,385 L760,385 L760,188" class="C on" id="cZ2"/>
+    <path d="M700,385 L820,385 L820,188" class="C on" id="cZ3"/>
+    <path d="M700,385 L880,385 L880,188" class="C on" id="cZ4"/>
+    <path d="M700,385 L940,385 L940,188" class="C on" id="cZ5"/>
+    <!-- Signal ticks at each zone valve -->
+    <rect x="698" y="188" width="4" height="3" rx="1" class="sig-tick on" id="sZ1"/>
+    <rect x="758" y="188" width="4" height="3" rx="1" class="sig-tick on" id="sZ2"/>
+    <rect x="818" y="188" width="4" height="3" rx="1" class="sig-tick on" id="sZ3"/>
+    <rect x="878" y="188" width="4" height="3" rx="1" class="sig-tick on" id="sZ4"/>
+    <rect x="938" y="188" width="4" height="3" rx="1" class="sig-tick on" id="sZ5"/>
+
+    <!-- ──────── CONDUIT LEGEND ──────── -->
+    <g transform="translate(22,510)">
+      <text x="0" y="0" font-size="6" fill="var(--text-dim)" font-weight="600">LEGEND:</text>
+      <line x1="45" y1="-2" x2="65" y2="-2" stroke="#b0bec5" stroke-width="4"/><text x="68" y="0" font-size="5.5" fill="var(--text-dim)">Water Pipe</text>
+      <line x1="115" y1="-2" x2="135" y2="-2" stroke="rgba(37,99,235,.6)" stroke-width="3" stroke-dasharray="3,5"/><text x="138" y="0" font-size="5.5" fill="var(--text-dim)">Plain Water</text>
+      <line x1="185" y1="-2" x2="205" y2="-2" stroke="rgba(22,163,74,.6)" stroke-width="3" stroke-dasharray="3,5"/><text x="208" y="0" font-size="5.5" fill="var(--text-dim)">Enriched Water</text>
+      <line x1="275" y1="-2" x2="295" y2="-2" stroke="rgba(202,138,4,.55)" stroke-width="1.2"/><text x="298" y="0" font-size="5.5" fill="var(--text-dim)">Conduit (Signal)</text>
+      <rect x="358" y="-5" width="8" height="6" rx="1" fill="var(--green)" opacity=".7"/><text x="370" y="0" font-size="5.5" fill="var(--text-dim)">Signal Active</text>
+      <circle cx="428" cy="-2" r="0" fill="none" stroke="var(--cyan)" stroke-width=".6"><animate attributeName="r" values="1;5" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values=".5;0" dur="1s" repeatCount="indefinite"/></circle>
+      <text x="436" y="0" font-size="5.5" fill="var(--text-dim)">Wireless</text>
+    </g>
+
+    <!-- Pressure relief valve (on pump discharge, before Tee_A) -->
+    <g transform="translate(345,280)">
+      <path d="M0,0 L0,-10" stroke="var(--orange)" stroke-width=".8"/>
+      <polygon points="-3,-10 3,-10 0,-15" fill="none" stroke="var(--orange)" stroke-width=".7"/>
+      <text x="8" y="-8" font-size="5" fill="var(--text-dim)">PRV</text>
+    </g>
+
+  </svg>
+</div>
+
+<!-- ══════════ RIGHT PANEL ══════════ -->
+<div class="right">
+  <div class="section-label">Live Sensor Readings</div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--cyan)">●</span> EC (Electrical Conductivity)</div>
+    <div class="kpi-val" style="color:var(--cyan)" id="kEC">1.80<span class="kpi-unit">mS/cm</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bEC" style="width:45%;background:var(--cyan)"></div></div>
+    <div class="sparkline" id="spEC"></div><div class="kpi-trend trend-stable" id="trEC">→ STABLE</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--purple)">●</span> pH Level</div>
+    <div class="kpi-val" style="color:var(--purple)" id="kPH">6.20<span class="kpi-unit">pH</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bPH" style="width:44%;background:var(--purple)"></div></div>
+    <div class="sparkline" id="spPH"></div><div class="kpi-trend trend-stable" id="trPH">→ STABLE</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--blue)">●</span> Water Flow Rate</div>
+    <div class="kpi-val" style="color:var(--blue)" id="kFlow">12.4<span class="kpi-unit">L/min</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bFlow" style="width:62%;background:var(--blue)"></div></div>
+    <div class="sparkline" id="spFlow"></div><div class="kpi-trend trend-up" id="trFlow">↑ +0.3</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--yellow)">●</span> Electricity · 3-Phase 415V</div>
+    <div class="kpi-val" style="color:var(--yellow)" id="kElec">4.2<span class="kpi-unit">kW</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bElec" style="width:56%;background:var(--yellow)"></div></div>
+    <div class="kpi-row">
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">R-Phase</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kVR">238<span class="kpi-unit">V</span></div></div>
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Y-Phase</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kVY">236<span class="kpi-unit">V</span></div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">B-Phase</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kVB">240<span class="kpi-unit">V</span></div></div>
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Line Voltage</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kVolt">415<span class="kpi-unit">V</span></div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Current Draw</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kAmp">17.6<span class="kpi-unit">A</span></div></div>
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Power Factor</div><div class="kpi-val" style="font-size:12px;color:var(--yellow)" id="kPF">0.87<span class="kpi-unit">pf</span></div></div>
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--orange)">●</span> Line Pressure</div>
+    <div class="kpi-val" style="color:var(--orange)" id="kPres">2.40<span class="kpi-unit">bar</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bPres" style="width:60%;background:var(--orange)"></div></div>
+    <div class="sparkline" id="spPres"></div><div class="kpi-trend trend-stable" id="trPres">→ STABLE</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--red)">●</span> Temperature</div>
+    <div class="kpi-val" style="color:var(--red)" id="kTemp">26.3<span class="kpi-unit">°C</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bTemp" style="width:52%;background:var(--red)"></div></div>
+    <div class="kpi-row">
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Water</div><div class="kpi-val" style="font-size:13px;color:var(--red)" id="kWt">24.1<span class="kpi-unit">°C</span></div></div>
+      <div class="kpi" style="border:none;padding:4px 0"><div class="kpi-label" style="font-size:7px">Ambient</div><div class="kpi-val" style="font-size:13px;color:var(--red)" id="kAmb">26.3<span class="kpi-unit">°C</span></div></div>
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label"><span style="color:var(--green)">●</span> Humidity</div>
+    <div class="kpi-val" style="color:var(--green)" id="kHum">68<span class="kpi-unit">%RH</span></div>
+    <div class="kpi-bar"><div class="kpi-fill" id="bHum" style="width:68%;background:var(--green)"></div></div>
+    <div class="sparkline" id="spHum"></div><div class="kpi-trend trend-stable" id="trHum">→ STABLE</div>
+  </div>
+  <div class="section-label">System</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label" style="font-size:7px">Total Flow</div><div class="kpi-val" style="font-size:14px" id="kTot">4,280<span class="kpi-unit">L</span></div></div>
+    <div class="kpi"><div class="kpi-label" style="font-size:7px">Tank Level</div><div class="kpi-val" style="font-size:14px" id="kTnk">62<span class="kpi-unit">%</span></div></div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label" style="font-size:7px">Active Zones</div><div class="kpi-val" style="font-size:14px;color:var(--green)" id="kAZ">2<span class="kpi-unit">/5</span></div></div>
+    <div class="kpi"><div class="kpi-label" style="font-size:7px">Cycle</div><div class="kpi-val" style="font-size:14px;color:var(--cyan)" id="kCyc">00:00<span class="kpi-unit">min</span></div></div>
+  </div>
+</div>
+
+<!-- ══════════ BOTTOM ══════════ -->
+<div class="bottom">
+  <div class="bottom-tabs">
+    <div class="bottom-tab active">System Log</div>
+    <div class="bottom-tab">Alerts</div>
+    <div class="bottom-tab">Cycle History</div>
+  </div>
+  <div class="log-feed" id="logF"></div>
+</div>
+</div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+const S={
+  mode:'auto',phase:0,timer:0,totalFlow:4280,srcLvl:3200,mixLvl:1850,
+  ec:1.8,ph:6.2,flow:12.4,pres:2.4,temp:26.3,wTemp:24.1,hum:68,vR:238,vY:236,vB:240,vLine:415,cur:17.6,pwr:4.2,pf:.87,
+  ro:true,blow:false,pump:true,fert:false,irr:true,
+  ecV:[false,false,false,false],phV:false,
+  zones:[true,true,true,true,true]
+};
+const DUR=[15,10,12,25,8];
+const NAMES=['FILL','MIX','INJECT','IRRIGATE','FLUSH'];
+
+// ═══════════════════ SPARKLINES ═══════════════════
+const spkIds=['spEC','spPH','spFlow','spPres','spHum'];
+const spkCol={spEC:'var(--cyan)',spPH:'var(--purple)',spFlow:'var(--blue)',spPres:'var(--orange)',spHum:'var(--green)'};
+function initSpark(){spkIds.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='';for(let i=0;i<20;i++){const b=document.createElement('div');b.className='spark-bar';b.style.height=Math.random()*16+3+'px';b.style.background=spkCol[id];el.appendChild(b)}})}
+function updSpark(id,v,mx){const el=document.getElementById(id);if(!el)return;const b=el.children;for(let i=0;i<b.length-1;i++)b[i].style.height=b[i+1].style.height;b[b.length-1].style.height=(v/mx*20)+'px'}
+
+// ═══════════════════ HELPERS ═══════════════════
+const $=id=>document.getElementById(id);
+const j=(v,r)=>v+(Math.random()-.5)*r;
+const h=(id,html)=>{const e=$(id);if(e)e.innerHTML=html};
+const a=(id,k,v)=>{const e=$(id);if(e)e.setAttribute(k,v)};
+const cls=(id,c,on)=>{const e=$(id);if(e){if(on)e.classList.add(c);else e.classList.remove(c)}};
+
+function badge(id,on){const e=$(id);if(!e)return;e.textContent=on?'ON':'OFF';e.className='badge '+(on?'badge-on':'badge-off')}
+function led(i,color){const e=$('led'+i);if(e)e.setAttribute('fill',color)}
+function conduit(id,on){cls(id,'on',on)}
+function sig(id,on){cls(id,'on',on)}
+function valve(id,dot,on){const e=$(id);if(e){e.setAttribute('fill',on?'var(--green-dim)':'#e2e8f0');e.setAttribute('stroke',on?'var(--green)':'#94a3b8')}const d=$(dot);if(d)d.setAttribute('fill',on?'var(--green)':'var(--red)')}
+function pumpAnim(blade,circ,on){const b=$(blade);const c=$(circ);if(b){if(on)b.classList.add('spinning');else b.classList.remove('spinning')}if(c){c.setAttribute('stroke',on?'var(--green)':'#94a3b8');if(on)c.setAttribute('filter','url(#fG)');else c.removeAttribute('filter')}}
+function flowOp(id,op){a(id,'opacity',op)}
+function zoneValve(i,on){const v=$('vZ'+i);const t=$('vZ'+i+'t');const r=$('zR'+i);const l=$('zL'+i);if(v){v.setAttribute('fill',on?'var(--green-dim)':'#e2e8f0');v.setAttribute('stroke',on?'var(--green)':'#94a3b8')}if(t)t.textContent=on?'ON':'OFF';if(r){if(on)r.classList.add('on');else r.classList.remove('on')}if(l){if(on)l.classList.add('on');else l.classList.remove('on')}}
+function trend(id,cur,base,th){const e=$(id);if(!e)return;const d=cur-base;if(Math.abs(d)<th){e.textContent='→ STABLE';e.className='kpi-trend trend-stable'}else if(d>0){e.textContent='↑ +'+d.toFixed(1);e.className='kpi-trend trend-up'}else{e.textContent='↓ '+d.toFixed(1);e.className='kpi-trend trend-down'}}
+
+// ═══════════════════ SENSORS ═══════════════════
+function updSensors(){
+  const p=S.phase;
+  S.ec=p===2?Math.min(2.5,S.ec+.02):j(1.8,.1);
+  S.ph=S.phV?Math.max(5.5,S.ph-.01):j(6.2,.15);
+  const az=S.zones.filter(z=>z).length;
+  S.flow=S.irr?j(6+az*2.5,.5):j(.5,.3);
+  S.pres=S.pump?j(2.4-az*.1,.1):j(.2,.05);
+  S.temp=j(26.3,.3);S.wTemp=j(24.1,.2);S.hum=j(68,2);
+  let pw=.3;if(S.ro)pw+=1.5;if(S.pump)pw+=3.7;if(S.blow)pw+=.4;
+  S.pwr=j(pw,.15);S.vR=j(238,3);S.vY=j(236,3);S.vB=j(240,3);S.vLine=j(415,4);S.pf=j(.87,.02);S.cur=S.pwr*1000/(S.vLine*Math.sqrt(3)*S.pf);
+  if(S.ro&&S.mixLvl<2800)S.mixLvl+=2;
+  if(S.irr&&az>0)S.mixLvl=Math.max(200,S.mixLvl-az*.8);
+  S.srcLvl=Math.max(500,S.srcLvl-(S.ro?1.5:0)+j(0,.2));
+  if(S.irr)S.totalFlow+=S.flow/60;
+}
+
+// ═══════════════════ CYCLE ═══════════════════
+function advCycle(){
+  S.timer++;
+  if(S.timer>=DUR[S.phase]){S.timer=0;S.phase=(S.phase+1)%5;applyPhase();addLog(S.phase===0?'ok':'info','Cycle → '+NAMES[S.phase]+' phase')}
+  for(let i=0;i<5;i++){const e=$('cyc'+i);e.className='cyc'+(i===S.phase?' on':(i<S.phase?' done':''))}
+  const el=DUR.slice(0,S.phase).reduce((a,b)=>a+b,0)+S.timer;
+  h('kCyc',String(Math.floor(el/60)).padStart(2,'0')+':'+String(el%60).padStart(2,'0')+'<span class="kpi-unit">min</span>');
+}
+function applyPhase(){
+  const p=S.phase;
+  S.ro=(p===0||p===3);S.blow=(p===1);
+  S.ecV=[p===2,p===2,p===2,p===2];S.phV=(p===2);
+  S.fert=(p===2||p===3);S.pump=(p>=2);S.irr=(p===3);
+  if(p===3)S.zones=[true,true,true,true,true];
+  else if(p===4){S.zones=[false,false,false,false,false];S.irr=true;S.pump=true}
+  else S.zones=[false,false,false,false,false];
+}
+
+// ═══════════════════ UI UPDATE ═══════════════════
+function updUI(){
+  // KPIs
+  h('kEC',S.ec.toFixed(2)+'<span class="kpi-unit">mS/cm</span>');
+  h('kPH',S.ph.toFixed(2)+'<span class="kpi-unit">pH</span>');
+  h('kFlow',S.flow.toFixed(1)+'<span class="kpi-unit">L/min</span>');
+  h('kElec',S.pwr.toFixed(1)+'<span class="kpi-unit">kW</span>');
+  h('kVR',Math.round(S.vR)+'<span class="kpi-unit">V</span>');
+  h('kVY',Math.round(S.vY)+'<span class="kpi-unit">V</span>');
+  h('kVB',Math.round(S.vB)+'<span class="kpi-unit">V</span>');
+  h('kVolt',Math.round(S.vLine)+'<span class="kpi-unit">V</span>');
+  h('kAmp',S.cur.toFixed(1)+'<span class="kpi-unit">A</span>');
+  h('kPF',S.pf.toFixed(2)+'<span class="kpi-unit">pf</span>');
+  h('kPres',S.pres.toFixed(2)+'<span class="kpi-unit">bar</span>');
+  h('kTemp',S.temp.toFixed(1)+'<span class="kpi-unit">°C</span>');
+  h('kWt',S.wTemp.toFixed(1)+'<span class="kpi-unit">°C</span>');
+  h('kAmb',S.temp.toFixed(1)+'<span class="kpi-unit">°C</span>');
+  h('kHum',Math.round(S.hum)+'<span class="kpi-unit">%RH</span>');
+  h('kTot',Math.round(S.totalFlow).toLocaleString()+'<span class="kpi-unit">L</span>');
+  const tp=Math.round(S.mixLvl/3000*100);
+  h('kTnk',tp+'<span class="kpi-unit">%</span>');
+  const az=S.zones.filter(z=>z).length;
+  h('kAZ',az+'<span class="kpi-unit">/5</span>');
+
+  // Bars
+  $('bEC').style.width=(S.ec/4*100)+'%';
+  $('bPH').style.width=(S.ph/14*100)+'%';
+  $('bFlow').style.width=(S.flow/20*100)+'%';
+  $('bElec').style.width=Math.min(100,(S.pwr/7.5*100))+'%';
+  $('bPres').style.width=(S.pres/4*100)+'%';
+  $('bTemp').style.width=(S.temp/50*100)+'%';
+  $('bHum').style.width=S.hum+'%';
+
+  // Sparklines
+  updSpark('spEC',S.ec,4);updSpark('spPH',S.ph,14);updSpark('spFlow',S.flow,20);
+  updSpark('spPres',S.pres,4);updSpark('spHum',S.hum,100);
+
+  // SVG readings
+  const st=$('srcLvlTxt');if(st)st.textContent=Math.round(S.srcLvl);
+  const mt=$('mixLvlTxt');if(mt)mt.textContent=Math.round(S.mixLvl);
+  const mp=$('mixPct');if(mp)mp.textContent=tp+'%';
+  const te=$('tEC');if(te)te.textContent=S.ec.toFixed(1);
+  const tph=$('tPH');if(tph)tph.textContent=S.ph.toFixed(1);
+  const ft=$('flowTxt');if(ft)ft.textContent=S.flow.toFixed(1);
+  const tt=$('totTxt');if(tt)tt.textContent=Math.round(S.totalFlow).toLocaleString();
+  const pt=$('prTxt');if(pt)pt.textContent=S.pres.toFixed(1);
+  const ei=$('ecInline');if(ei)ei.textContent=S.ec.toFixed(1);
+  const pi=$('phInline');if(pi)pi.textContent=S.ph.toFixed(1);
+  const ti=$('tmpInline');if(ti)ti.textContent=Math.round(S.wTemp);
+
+  // Badges
+  badge('bRO',S.ro);badge('bBlow',S.blow);badge('bPump',S.pump);badge('bIrr',S.irr);
+  badge('bEC1',S.ecV[0]);badge('bEC2',S.ecV[1]);badge('bEC3',S.ecV[2]);badge('bEC4',S.ecV[3]);badge('bPH',S.phV);
+  for(let i=0;i<5;i++)badge('bZ'+(i+1),S.zones[i]);
+
+  // Pumps
+  pumpAnim('roBlade','roCirc',S.ro);
+  pumpAnim('pumpBlade','pumpCirc',S.pump);
+  // Blower
+  const bb=$('blowBlade');const bc=$('blowCirc');
+  if(bb){if(S.blow){bb.classList.add('spinning');bb.querySelectorAll('line').forEach(l=>l.setAttribute('stroke','var(--cyan)'))}else{bb.classList.remove('spinning');bb.querySelectorAll('line').forEach(l=>l.setAttribute('stroke','#94a3b8'))}}
+  if(bc)bc.setAttribute('stroke',S.blow?'var(--cyan)':'#94a3b8');
+
+  // Nutrient valves
+  valve('vEC1','dEC1',S.ecV[0]);valve('vEC2','dEC2',S.ecV[1]);valve('vEC3','dEC3',S.ecV[2]);valve('vEC4','dEC4',S.ecV[3]);valve('vPH','dPH',S.phV);
+
+  // Irr valve
+  const iv=$('vIrr');const ivt=$('vIrrTxt');
+  if(iv){iv.setAttribute('fill',S.irr?'var(--green-dim)':'#e2e8f0');iv.setAttribute('stroke',S.irr?'var(--green)':'#94a3b8')}
+  if(ivt)ivt.textContent=S.irr?'ON':'OFF';
+
+  // Zone valves
+  for(let i=1;i<=5;i++)zoneValve(i,S.zones[i-1]);
+
+  // ═══ Water flow overlays ═══
+  flowOp('fSrcRO',S.ro?.75:.12);flowOp('fROmix',S.ro?.75:.12);
+  flowOp('fBlow',S.blow?.6:0);
+  const anyN=S.ecV.some(v=>v)||S.phV;
+  const chA=S.ecV[0]||S.ecV[1]; const chB=S.ecV[2]||S.ecV[3]; const chC=S.phV;
+  flowOp('fE1',S.ecV[0]?.7:0);flowOp('fE2',S.ecV[1]?.7:0);flowOp('fE3',S.ecV[2]?.7:0);flowOp('fE4',S.ecV[3]?.7:0);flowOp('fPHd',S.phV?.7:0);
+  flowOp('fNH_A',chA?.6:0);flowOp('fNHA_down',chA?.6:0);
+  flowOp('fNH_B',chB?.6:0);flowOp('fNHB_down',chB?.6:0);
+  flowOp('fVenIn',(anyN||S.fert)?.5:0);flowOp('fVenMid',(anyN||S.fert)?.5:0);flowOp('fVenOut',(anyN||S.fert)?.5:0);
+  flowOp('fMxP1',S.pump?.7:.12);
+  flowOp('fPF',S.pump?.7:.12);
+  // Green enriched flow: visible when pump is on AND nutrients have been injected (fert or inject phase)
+  const enriched=S.pump&&(anyN||S.fert||S.phase>=2);
+  flowOp('fPFn',enriched?.7:0);
+  flowOp('fRiser',S.irr?.7:.12);flowOp('fZH',S.irr?.7:.12);
+  // Show/hide enriched label
+  const txE=$('txEnriched');if(txE)txE.setAttribute('opacity',enriched?.7:0);
+  for(let i=1;i<=5;i++)flowOp('fZ'+i,S.zones[i-1]?.7:0);
+
+  // ═══ Conduits & signals (Gateway) ═══
+  // Gateway LEDs: 0=RO, 1=Blow, 2=EC1, 3=EC2, 4=EC3, 5=EC4, 6=pH, 7=Pump
+  const gwPins=[S.ro,S.blow,S.ecV[0],S.ecV[1],S.ecV[2],S.ecV[3],S.phV,S.pump];
+  gwPins.forEach((on,i)=>led(i,on?'var(--green)':'#cbd5e1'));
+  conduit('cRO',S.ro);sig('sRO',S.ro);
+  conduit('cBlow',S.blow);sig('sBlow',S.blow);
+  conduit('cEC1',S.ecV[0]);sig('sEC1',S.ecV[0]);
+  conduit('cEC2',S.ecV[1]);sig('sEC2',S.ecV[1]);
+  conduit('cEC3',S.ecV[2]);sig('sEC3',S.ecV[2]);
+  conduit('cEC4',S.ecV[3]);sig('sEC4',S.ecV[3]);
+  conduit('cPHc',S.phV);sig('sPH',S.phV);
+  conduit('cPump',S.pump);sig('sPump',S.pump);
+
+  // ═══ Conduits & signals (End Node) ═══
+  conduit('cIrr',S.irr);sig('sIrr',S.irr);
+  for(let i=1;i<=5;i++){conduit('cZ'+i,S.zones[i-1]);sig('sZ'+i,S.zones[i-1])}
+
+  // Trends
+  trend('trEC',S.ec,1.8,.1);trend('trPH',S.ph,6.2,.1);trend('trFlow',S.flow,12,1);
+  trend('trPres',S.pres,2.4,.15);trend('trHum',S.hum,68,3);
+
+  // Clock
+  $('clock').textContent=new Date().toTimeString().slice(0,8);
+}
+
+// ═══════════════════ LOG ═══════════════════
+function addLog(type,msg){const f=$('logF');const t=new Date().toTimeString().slice(0,8);const d=document.createElement('div');d.className='log-item';d.innerHTML=`<span class="log-dot ${type}"></span><span class="log-time">${t}</span><span class="log-msg">${msg}</span>`;f.insertBefore(d,f.firstChild);if(f.children.length>50)f.removeChild(f.lastChild)}
+function setMode(m){S.mode=m;['mAuto','mSemi','mMan'].forEach(id=>$(id).classList.remove('active'));$('m'+m.charAt(0).toUpperCase()+m.slice(1)).classList.add('active');addLog('info','Mode → '+m.toUpperCase())}
+function sel(el){document.querySelectorAll('.dev').forEach(d=>d.classList.remove('active'));el.classList.add('active')}
+
+// ═══════════════════ MAIN LOOP ═══════════════════
+let tick=0;
+function loop(){
+  tick++;updSensors();updUI();
+  if(S.mode==='auto')advCycle();
+  if(tick%8===0){const msgs=[['info','EC: '+S.ec.toFixed(2)+' mS/cm'],['info','pH: '+S.ph.toFixed(2)],['info','Flow: '+S.flow.toFixed(1)+' L/min'],['info','Pressure: '+S.pres.toFixed(2)+' bar'],['ok','All sensors nominal'],['info','Power: '+S.pwr.toFixed(1)+' kW'],['info','Mix tank: '+Math.round(S.mixLvl)+'L'],['warn','Humidity: '+Math.round(S.hum)+'%']];const p=msgs[Math.floor(Math.random()*msgs.length)];addLog(p[0],p[1])}
+  if(tick%140===0&&S.phase===3){addLog('info','All 5 zones irrigating — cycle continues')}
+}
+
+// ═══════════════════ INIT ═══════════════════
+initSpark();
+addLog('ok','System initialized — Auto mode');
+addLog('info','Gateway online — 8 pins mapped');
+addLog('info','End Node online — 6 outputs (IO Expander)');
+addLog('info','LoRa/Wi-Fi link established — RSSI -42dBm');
+addLog('info','3-Channel Venturi: V-A(EC1+EC2) V-B(EC3+EC4) V-C(pH)');
+applyPhase();updUI();
+setInterval(loop,1000);
+</script>
+</body>
+</html>
