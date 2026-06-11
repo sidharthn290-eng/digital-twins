@@ -169,139 +169,155 @@ svg text { font-family:'Inter',sans-serif; }
   </div>
 </div>
 
-<!-- VIEWPORT — layout matches farm diagram: pump bottom-left, irrigation room above, 4 lines going right -->
+<!-- VIEWPORT — layout matches client dripline design: well+pump station bottom-right, M1/M2 main valves at station, 2 risers each splitting into 2 zones -->
 <div class="viewport">
 <svg width="100%" height="100%" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <pattern id="grass" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#d1fae5"/><circle cx="3" cy="3" r=".6" fill="#86efac" opacity=".5"/></pattern>
+    <pattern id="drip" width="8" height="12" patternUnits="userSpaceOnUse"><rect width="8" height="12" fill="#ecfdf5"/><line x1="0" y1="6" x2="8" y2="6" stroke="#fbbf24" stroke-width="1"/></pattern>
     <filter id="sh"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity=".08"/></filter>
   </defs>
   <rect width="800" height="480" fill="#f0f4f7"/>
   <text x="30" y="22" font-size="9" fill="#94a3b8" font-family="var(--mono)">DRIPLINE DIGITAL TWIN — 4 ZONES · 2.5 AC</text>
 
-  <!-- ═══ MAIN PUMP (bottom-left) ═══ -->
+  <!-- ═══ MAIN LINES from pump station: M1 feeds Riser 1 (Z1+Z2), M2 feeds Riser 2 (Z3+Z4) ═══ -->
+  <polyline class="pipe pipe-main pipe-flow" id="mlineA" points="560,255 560,230 170,230"/>
+  <polyline class="pipe pipe-main pipe-flow" id="mlineB" points="560,255 410,255"/>
+  <text x="300" y="224" font-size="6.5" fill="#64748b">Main line PVC 63mm</text>
+  <circle cx="560" cy="255" r="4" fill="#3b82f6"/>
+  <circle cx="170" cy="230" r="3" fill="#3b82f6"/>
+  <circle cx="410" cy="255" r="3" fill="#3b82f6"/>
+
+  <!-- MAIN VALVES near pump & filter -->
+  <g><rect x="505" y="222" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="vm1box"/><text x="513" y="233" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="vm1txt">M1</text></g>
+  <g><rect x="505" y="247" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="vm2box"/><text x="513" y="258" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="vm2txt">M2</text></g>
+
+  <!-- RISERS: each splits into 2 zones at the grow area -->
+  <polyline class="pipe pipe-branch" id="pipeA" points="170,230 170,145"/>
+  <polyline class="pipe pipe-branch" id="pipeB" points="170,230 170,300"/>
+  <polyline class="pipe pipe-branch" id="pipeC" points="410,255 410,145"/>
+  <polyline class="pipe pipe-branch" id="pipeD" points="410,255 410,300"/>
+  <text x="178" y="296" font-size="6.5" fill="#64748b">Sub-main 50mm</text>
+
+  <!-- ZONE BALL VALVES at the splits -->
+  <g><rect x="162" y="180" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v1box"/><text x="170" y="191" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v1txt">V1</text></g>
+  <g><rect x="162" y="258" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v2box"/><text x="170" y="269" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v2txt">V2</text></g>
+  <g><rect x="402" y="195" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v3box"/><text x="410" y="206" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v3txt">V3</text></g>
+  <g><rect x="402" y="268" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v4box"/><text x="410" y="279" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v4txt">V4</text></g>
+
+  <!-- Sub-mains continuing through each zone block -->
+  <line class="pipe pipe-branch" id="lineA" x1="170" y1="145" x2="170" y2="58"/>
+  <line class="pipe pipe-branch" id="lineB" x1="170" y1="300" x2="170" y2="388"/>
+  <line class="pipe pipe-branch" id="lineC" x1="410" y1="145" x2="410" y2="58"/>
+  <line class="pipe pipe-branch" id="lineD" x1="410" y1="300" x2="410" y2="388"/>
+
+  <!-- ═══ GROW AREA — 4 ZONE BLOCKS (drip tape laterals off each riser) ═══ -->
+  <rect x="75" y="55" width="190" height="90" rx="5" fill="url(#drip)" stroke="#86efac" stroke-width="1"/>
+  <rect x="79" y="60" width="88" height="14" rx="3" fill="#ffffffd9"/>
+  <text x="83" y="70.5" font-size="8.5" font-weight="600" fill="#15803d">Zone 1 · 0.625 ac</text>
+  <rect x="219" y="60" width="42" height="14" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
+  <text x="222" y="70" font-size="6" fill="#64748b">💧</text>
+  <text x="258" y="70.5" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMA">65%</text>
+
+  <rect x="75" y="300" width="190" height="90" rx="5" fill="url(#drip)" stroke="#86efac" stroke-width="1"/>
+  <rect x="79" y="305" width="88" height="14" rx="3" fill="#ffffffd9"/>
+  <text x="83" y="315.5" font-size="8.5" font-weight="600" fill="#15803d">Zone 2 · 0.625 ac</text>
+  <rect x="219" y="305" width="42" height="14" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
+  <text x="222" y="315" font-size="6" fill="#64748b">💧</text>
+  <text x="258" y="315.5" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMB">58%</text>
+
+  <rect x="315" y="55" width="190" height="90" rx="5" fill="url(#drip)" stroke="#86efac" stroke-width="1"/>
+  <rect x="319" y="60" width="88" height="14" rx="3" fill="#ffffffd9"/>
+  <text x="323" y="70.5" font-size="8.5" font-weight="600" fill="#15803d">Zone 3 · 0.625 ac</text>
+  <rect x="459" y="60" width="42" height="14" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
+  <text x="462" y="70" font-size="6" fill="#64748b">💧</text>
+  <text x="498" y="70.5" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMC">70%</text>
+
+  <rect x="315" y="300" width="190" height="90" rx="5" fill="url(#drip)" stroke="#86efac" stroke-width="1"/>
+  <rect x="319" y="305" width="88" height="14" rx="3" fill="#ffffffd9"/>
+  <text x="323" y="315.5" font-size="8.5" font-weight="600" fill="#15803d">Zone 4 · 0.625 ac</text>
+  <rect x="459" y="305" width="42" height="14" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
+  <text x="462" y="315" font-size="6" fill="#64748b">💧</text>
+  <text x="498" y="315.5" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMD">55%</text>
+
+  <!-- ═══ PUMP STATION (bottom-right): well → pump → NRV → venturi → filter → main valves ═══ -->
   <g>
-    <rect x="30" y="355" width="110" height="90" rx="10" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
-    <text x="85" y="375" text-anchor="middle" font-size="10" font-weight="600" fill="#334155">Main Pump</text>
-    <circle cx="85" cy="410" r="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" id="pumpCircle"/>
-    <text x="85" y="414" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8" id="pumpText">ON</text>
-  </g>
-
-  <!-- PIPE: Pump UP to Irrigation Room -->
-  <polyline class="pipe pipe-main pipe-flow" id="pipe1" points="85,355 85,270"/>
-  <text x="92" y="318" font-size="10" fill="#3b82f6">↑</text>
-
-  <!-- ═══ IRRIGATION ROOM (sand filter + control panel + gateway + sensors) ═══ -->
-  <g>
-    <rect x="20" y="80" width="260" height="180" rx="10" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
-    <text x="150" y="100" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Irrigation Room</text>
-
-    <!-- Sand Filter -->
-    <rect x="35" y="112" width="75" height="55" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/>
-    <text x="72" y="127" text-anchor="middle" font-size="9" font-weight="600" fill="#475569">Sand Filter</text>
-    <line x1="45" y1="136" x2="100" y2="136" stroke="#94a3b8" stroke-width="1"/>
-    <line x1="45" y1="143" x2="100" y2="143" stroke="#94a3b8" stroke-width="1"/>
-    <line x1="45" y1="150" x2="100" y2="150" stroke="#94a3b8" stroke-width="1"/>
-    <line x1="45" y1="157" x2="100" y2="157" stroke="#94a3b8" stroke-width="1"/>
-
-    <!-- Control Panel -->
-    <rect x="125" y="112" width="60" height="55" rx="4" fill="#1e293b" stroke="#334155"/>
-    <text x="155" y="130" text-anchor="middle" font-size="8" font-weight="600" fill="#94a3b8">Control</text>
-    <text x="155" y="142" text-anchor="middle" font-size="8" font-weight="600" fill="#94a3b8">Panel</text>
-    <circle cx="138" cy="155" r="3" fill="#22c55e"/><circle cx="148" cy="155" r="3" fill="#22c55e"/><circle cx="158" cy="155" r="3" fill="#3b82f6"/><circle cx="168" cy="155" r="3" fill="#f59e0b"/>
-
-    <!-- Gateway image -->
-    <image id="gwImg" x="195" y="105" width="70" height="58" preserveAspectRatio="xMidYMid meet"/>
-    <text x="231" y="170" text-anchor="middle" font-size="7" font-weight="600" fill="#0284c7">GW-01</text>
+    <rect x="545" y="300" width="245" height="162" rx="10" fill="#fff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
+    <text x="667" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">Pump Station</text>
 
     <!-- Sensor readouts -->
-    <text x="38" y="188" font-size="7" fill="#64748b">Flow</text>
-    <text x="38" y="200" font-size="9" font-weight="600" fill="#0284c7" id="svgFlow">12.3 L/m</text>
-    <text x="105" y="188" font-size="7" fill="#64748b">EC</text>
-    <text x="105" y="200" font-size="9" font-weight="600" fill="#7c3aed" id="svgEC">1.8 mS</text>
-    <text x="155" y="188" font-size="7" fill="#64748b">pH</text>
-    <text x="155" y="200" font-size="9" font-weight="600" fill="#0891b2" id="svgPH">6.5</text>
-    <text x="195" y="188" font-size="7" fill="#64748b">W.Temp</text>
-    <text x="195" y="200" font-size="9" font-weight="600" fill="#dc2626" id="svgWTemp">24.2°C</text>
+    <text x="558" y="332" font-size="6" fill="#64748b">Flow</text>
+    <text x="558" y="343" font-size="8" font-weight="600" fill="#0284c7" id="svgFlow">12.3 L/m</text>
+    <text x="610" y="332" font-size="6" fill="#64748b">EC</text>
+    <text x="610" y="343" font-size="8" font-weight="600" fill="#7c3aed" id="svgEC">1.8 mS</text>
+    <text x="648" y="332" font-size="6" fill="#64748b">pH</text>
+    <text x="648" y="343" font-size="8" font-weight="600" fill="#0891b2" id="svgPH">6.5</text>
+    <text x="676" y="332" font-size="6" fill="#64748b">W.Temp</text>
+    <text x="676" y="343" font-size="8" font-weight="600" fill="#dc2626" id="svgWTemp">24.2°C</text>
+    <text x="722" y="332" font-size="6" fill="#64748b">Press</text>
+    <text x="722" y="343" font-size="8" font-weight="600" fill="#d97706" id="svgPress">2.4 bar</text>
 
-    <!-- Pressure -->
-    <circle cx="45" cy="232" r="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
-    <text x="45" y="235" text-anchor="middle" font-size="7" font-weight="700" fill="#d97706">P</text>
-    <text x="68" y="236" font-size="7" fill="#d97706" id="svgPress">2.4 bar</text>
+    <!-- Pipe: pump → NRV → venturi → filter -->
+    <polyline class="pipe pipe-main pipe-flow" id="pipe1" points="700,404 700,362 614,362"/>
+    <!-- Filter → up to main valves -->
+    <polyline class="pipe pipe-main pipe-flow" id="pipe2" points="586,362 560,362 560,255"/>
+
+    <!-- NRV -->
+    <rect x="650" y="357" width="10" height="10" rx="2" fill="#e2e8f0" stroke="#64748b"/>
+    <text x="655" y="378" text-anchor="middle" font-size="5.5" fill="#64748b">NRV</text>
+    <!-- Venturi -->
+    <rect x="624" y="358" width="12" height="8" rx="2" fill="#fef3c7" stroke="#d97706"/>
+    <text x="630" y="352" text-anchor="middle" font-size="5.5" fill="#d97706">Venturi</text>
+    <!-- Filter -->
+    <rect x="586" y="348" width="28" height="28" rx="4" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <line x1="590" y1="356" x2="610" y2="356" stroke="#94a3b8" stroke-width="1"/>
+    <line x1="590" y1="362" x2="610" y2="362" stroke="#94a3b8" stroke-width="1"/>
+    <line x1="590" y1="368" x2="610" y2="368" stroke="#94a3b8" stroke-width="1"/>
+    <text x="600" y="386" text-anchor="middle" font-size="5.5" fill="#64748b">Filter</text>
+    <!-- Pressure gauge -->
+    <circle cx="573" cy="340" r="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="573" y="343" text-anchor="middle" font-size="6" font-weight="700" fill="#d97706">P</text>
+    <!-- Air release on riser -->
+    <circle cx="560" cy="285" r="3.5" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.2"/>
+    <text x="568" y="288" font-size="5.5" fill="#0284c7">Air release</text>
+
+    <!-- Well → pump -->
+    <line x1="742" y1="424" x2="716" y2="420" stroke="#94a3b8" stroke-width="3"/>
+    <ellipse cx="762" cy="425" rx="20" ry="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+    <text x="762" y="450" text-anchor="middle" font-size="7" fill="#0284c7">Well</text>
+    <!-- Bypass valve -->
+    <rect x="722" y="398" width="10" height="10" rx="2" fill="#e2e8f0" stroke="#64748b"/>
+    <text x="727" y="394" text-anchor="middle" font-size="5.5" fill="#64748b">Bypass</text>
+    <!-- Pump -->
+    <circle cx="700" cy="420" r="16" fill="#dbeafe" stroke="#3b82f6" stroke-width="2" id="pumpCircle"/>
+    <text x="700" y="424" text-anchor="middle" font-size="8" font-weight="700" fill="#1d4ed8" id="pumpText">ON</text>
+    <text x="700" y="450" text-anchor="middle" font-size="7" fill="#334155">Pump</text>
   </g>
 
-  <!-- PIPE: Room RIGHT to valve manifold -->
-  <polyline class="pipe pipe-main pipe-flow" id="pipe2" points="280,165 350,165"/>
-  <text x="315" y="160" font-size="10" fill="#3b82f6">→</text>
-
-  <!-- Manifold -->
-  <circle cx="350" cy="165" r="5" fill="#3b82f6"/>
-
-  <!-- 4 HORIZONTAL LINES going right to field (matches diagram) -->
-  <polyline class="pipe pipe-branch" id="pipeA" points="350,165 350,100 390,100"/>
-  <polyline class="pipe pipe-branch" id="pipeB" points="350,165 350,145 390,145"/>
-  <polyline class="pipe pipe-branch" id="pipeC" points="350,165 350,190 390,190"/>
-  <polyline class="pipe pipe-branch" id="pipeD" points="350,165 350,235 390,235"/>
-
-  <!-- VALVES -->
-  <g><rect x="380" y="92" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v1box"/><text x="388" y="103" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v1txt">V1</text></g>
-  <g><rect x="380" y="137" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v2box"/><text x="388" y="148" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v2txt">V2</text></g>
-  <g><rect x="380" y="182" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v3box"/><text x="388" y="193" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v3txt">V3</text></g>
-  <g><rect x="380" y="227" width="16" height="16" rx="3" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" id="v4box"/><text x="388" y="238" text-anchor="middle" font-size="7" font-weight="700" fill="#16a34a" id="v4txt">V4</text></g>
-
-  <!-- Long horizontal pipes from valves to field -->
-  <line class="pipe pipe-branch" id="lineA" x1="396" y1="100" x2="785" y2="100"/>
-  <line class="pipe pipe-branch" id="lineB" x1="396" y1="145" x2="785" y2="145"/>
-  <line class="pipe pipe-branch" id="lineC" x1="396" y1="190" x2="785" y2="190"/>
-  <line class="pipe pipe-branch" id="lineD" x1="396" y1="235" x2="785" y2="235"/>
-
-  <!-- EndNode image near main pump -->
-  <image id="enImg" x="145" y="350" width="70" height="90" preserveAspectRatio="xMidYMid meet"/>
-  <text x="180" y="448" text-anchor="middle" font-size="7" font-weight="600" fill="#16a34a">EN-01</text>
-  <text x="180" y="458" text-anchor="middle" font-size="6" fill="#64748b">Controls Pump</text>
-
-  <!-- ═══ GROW AREA — 4 PLOT STRIPS (open field) ═══ -->
-  <rect x="420" y="62" width="360" height="35" rx="5" fill="url(#grass)" stroke="#86efac" stroke-width="1"/>
-  <text x="430" y="84" font-size="9" font-weight="600" fill="#15803d">Zone 1</text>
-  <rect x="560" y="71" width="36" height="16" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
-  <text x="563" y="81" font-size="6" fill="#64748b">💧</text>
-  <text x="590" y="82" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMA">65%</text>
-
-  <rect x="420" y="107" width="360" height="35" rx="5" fill="url(#grass)" stroke="#86efac" stroke-width="1"/>
-  <text x="430" y="129" font-size="9" font-weight="600" fill="#15803d">Zone 2</text>
-  <rect x="560" y="116" width="36" height="16" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
-  <text x="563" y="126" font-size="6" fill="#64748b">💧</text>
-  <text x="590" y="127" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMB">58%</text>
-
-  <rect x="420" y="152" width="360" height="35" rx="5" fill="url(#grass)" stroke="#86efac" stroke-width="1"/>
-  <text x="430" y="174" font-size="9" font-weight="600" fill="#15803d">Zone 3</text>
-  <rect x="560" y="161" width="36" height="16" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
-  <text x="563" y="171" font-size="6" fill="#64748b">💧</text>
-  <text x="590" y="172" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMC">70%</text>
-
-  <rect x="420" y="197" width="360" height="35" rx="5" fill="url(#grass)" stroke="#86efac" stroke-width="1"/>
-  <text x="430" y="219" font-size="9" font-weight="600" fill="#15803d">Zone 4</text>
-  <rect x="560" y="206" width="36" height="16" rx="3" fill="#ffffffcc" stroke="#16a34a" stroke-width=".8"/>
-  <text x="563" y="216" font-size="6" fill="#64748b">💧</text>
-  <text x="590" y="217" text-anchor="end" font-size="8" font-weight="600" fill="#16a34a" font-family="var(--mono)" id="svgMD">55%</text>
+  <!-- Gateway + EndNode (top-right) -->
+  <image id="gwImg" x="600" y="60" width="70" height="58" preserveAspectRatio="xMidYMid meet"/>
+  <text x="635" y="128" text-anchor="middle" font-size="7" font-weight="600" fill="#0284c7">GW-01</text>
+  <text x="635" y="137" text-anchor="middle" font-size="6" fill="#64748b">Gateway · Pump Station</text>
+  <image id="enImg" x="605" y="155" width="58" height="74" preserveAspectRatio="xMidYMid meet"/>
+  <text x="635" y="240" text-anchor="middle" font-size="7" font-weight="600" fill="#16a34a">EN-01</text>
+  <text x="635" y="249" text-anchor="middle" font-size="6" fill="#64748b">Controls Pump</text>
 
   <!-- Sunlight sensor -->
   <g>
-    <circle cx="720" cy="290" r="14" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="720" y1="272" x2="720" y2="267" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="732" y1="278" x2="736" y2="274" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="738" y1="290" x2="743" y2="290" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="732" y1="302" x2="736" y2="306" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="720" y1="308" x2="720" y2="313" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="708" y1="302" x2="704" y2="306" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="702" y1="290" x2="697" y2="290" stroke="#eab308" stroke-width="1.5"/>
-    <line x1="708" y1="278" x2="704" y2="274" stroke="#eab308" stroke-width="1.5"/>
-    <text x="720" y="294" text-anchor="middle" font-size="9" font-weight="700" fill="#a16207">☀</text>
-    <text x="720" y="326" text-anchor="middle" font-size="8" fill="#a16207">Sunlight</text>
-    <text x="720" y="338" text-anchor="middle" font-size="8" fill="#a16207" font-family="var(--mono)" id="svgSun">780 W/m²</text>
+    <circle cx="735" cy="90" r="14" fill="#fef9c3" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="735" y1="72" x2="735" y2="67" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="747" y1="78" x2="751" y2="74" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="753" y1="90" x2="758" y2="90" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="747" y1="102" x2="751" y2="106" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="735" y1="108" x2="735" y2="113" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="723" y1="102" x2="719" y2="106" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="717" y1="90" x2="712" y2="90" stroke="#eab308" stroke-width="1.5"/>
+    <line x1="723" y1="78" x2="719" y2="74" stroke="#eab308" stroke-width="1.5"/>
+    <text x="735" y="94" text-anchor="middle" font-size="9" font-weight="700" fill="#a16207">☀</text>
+    <text x="735" y="126" text-anchor="middle" font-size="8" fill="#a16207">Sunlight</text>
+    <text x="735" y="138" text-anchor="middle" font-size="8" fill="#a16207" font-family="var(--mono)" id="svgSun">780 W/m²</text>
   </g>
 
-  <text x="30" y="468" font-size="8" fill="#cbd5e1">Water Source → Main Pump ↑ Irrigation Room → Valves → 4 Dripline Zones · 2.5 ac total</text>
+  <text x="30" y="472" font-size="8" fill="#cbd5e1">Well → Pump → NRV → Venturi → Filter → Main Valves M1/M2 → Risers → Zone Valves V1–V4 → Drip Laterals · 0.625 ac/zone · 2.5 ac total</text>
 </svg>
 </div>
 
@@ -374,6 +390,8 @@ svg text { font-family:'Inter',sans-serif; }
   <div class="detail-section">
     <div class="detail-title">Actuators</div>
     <div class="actuator-row"><span class="actuator-label">Main Pump</span><span class="station-badge badge-on" id="rPump">ON</span></div>
+    <div class="actuator-row"><span class="actuator-label">M1 — Main Valve (Zone 1+2)</span><span class="station-badge badge-on" id="rVM1">OPEN</span></div>
+    <div class="actuator-row"><span class="actuator-label">M2 — Main Valve (Zone 3+4)</span><span class="station-badge badge-on" id="rVM2">OPEN</span></div>
     <div class="actuator-row"><span class="actuator-label">V1 — Zone 1</span><span class="station-badge badge-on" id="rV1">OPEN</span></div>
     <div class="actuator-row"><span class="actuator-label">V2 — Zone 2</span><span class="station-badge badge-on" id="rV2">OPEN</span></div>
     <div class="actuator-row"><span class="actuator-label">V3 — Zone 3</span><span class="station-badge badge-on" id="rV3">OPEN</span></div>
@@ -538,6 +556,19 @@ function updateUI(){
     const el=document.getElementById(id);
     if(el){if(S.pumpOn&&S.valves[i]){el.classList.add('pipe-flow');el.classList.remove('pipe-off');}
     else{el.classList.remove('pipe-flow');el.classList.add('pipe-off');}}
+  });
+
+  // Main valves M1/M2 near pump — open when either zone of their pair is open
+  [['vm1',[0,1],'mlineA','rVM1'],['vm2',[2,3],'mlineB','rVM2']].forEach(([v,pair,line,rid])=>{
+    const open=pair.some(i=>S.valves[i]);
+    const box=document.getElementById(v+'box'), txt=document.getElementById(v+'txt');
+    const rEl=document.getElementById(rid), el=document.getElementById(line);
+    if(open){box.setAttribute('fill','#dcfce7');box.setAttribute('stroke','#16a34a');txt.setAttribute('fill','#16a34a');
+      if(rEl){rEl.className='station-badge badge-on';rEl.textContent='OPEN';}}
+    else{box.setAttribute('fill','#fee2e2');box.setAttribute('stroke','#dc2626');txt.setAttribute('fill','#dc2626');
+      if(rEl){rEl.className='station-badge badge-off';rEl.textContent='SHUT';}}
+    if(S.pumpOn&&open){el.classList.add('pipe-flow');el.classList.remove('pipe-off');}
+    else{el.classList.remove('pipe-flow');el.classList.add('pipe-off');}
   });
 
   // Valves
